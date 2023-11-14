@@ -11,6 +11,12 @@ SESSION_CONFIGS = [
     dict(
         name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
     ),
+    dict(
+        name='public_goods_simple', display_name="Simple Public Good", app_sequence=['public_goods_simple'], num_demo_participants=3, SESSION_FIELDS= ["multiplier", "last_multiplier"], PARTICIPANT_FIELDS=["endowment"]
+    ), #setting Session Fields to store current round multiplier and last round multiplier
+    dict(
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['cooperate_defect_game'], num_demo_participants=6,  PARTICIPANT_FIELDS=["Total_payoff","Opponent_record"] 
+    ),
 ]
 
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
