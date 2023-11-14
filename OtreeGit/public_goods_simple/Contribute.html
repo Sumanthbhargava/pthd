@@ -5,13 +5,34 @@
     <p>
         This is a public goods game with
         {{ C.PLAYERS_PER_GROUP }} players per group,
-        an endowment of {{ C.ENDOWMENT }},
-        and an efficiency factor of {{ C.MULTIPLIER }}.
+        an endowment of {{ player.participant.vars.get('endowment') }},
+        and an efficiency factor of {{ subsession.session.vars.get('multiplier') }}.
     </p>
-
 
     {{ formfields }}
 
     {{ next_button }}
+
+    {% if past_contributions %}
+    <h3>Past Contributions</h3>
+    <table>
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Contribution</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for contribution in past_contributions %}
+            <tr>
+                <td>{{ forloop.counter }}</td>
+                <td>{{ contribution }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% else %}
+    <h3>No Past Contributions</h3>
+    {% endif %}
 
 {{ endblock }}
