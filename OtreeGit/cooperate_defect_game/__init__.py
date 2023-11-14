@@ -35,7 +35,7 @@ class Player(BasePlayer):
     unique_id = models.IntegerField()
 
     def set_unique_id(self):
-        self.unique_id = self.particiapnt.id_in_session
+        self.unique_id = self.participant.id_in_session
 
 def creating_session(subsession: Subsession):
     for player in subsession.get_players():
