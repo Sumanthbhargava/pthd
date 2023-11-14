@@ -11,7 +11,7 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'prisoner'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 3
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
@@ -40,6 +40,9 @@ class Player(BasePlayer):
 def creating_session(subsession: Subsession):
     for player in subsession.get_players():
         player.set_unique_id()
+    
+    # Randomly pairs 6 players into 3 pairs before game A
+    subsession.group_randomly()
 
 # FUNCTIONS
 def set_payoffs(group: Group):
@@ -60,6 +63,7 @@ def set_payoff(player: Player):
     }
     other = other_player(player)
     player.payoff = payoff_matrix[(player.cooperate, other.cooperate)]
+
 
 
 # PAGES
@@ -89,4 +93,13 @@ class Results(Page):
         )
 
 
-page_sequence = [Introduction, Decision, ResultsWaitPage, Results]
+class GroupsShufflePage(WaitPage):
+    #Wait for all 6 players to be done with game A
+    wait_for_all_groups = True 
+
+    @staticmethod
+    def after_all_players_arrive(subsession):
+        #Shuffle players into new random pairs before they enter game B
+        subsession.group_randomly()
+
+page_sequence = [Introduction, Decision, ResultsWaitPage, Results, GroupsShufflePage, Decision, ResultsWaitPage, Results]
