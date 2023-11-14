@@ -32,7 +32,14 @@ class Player(BasePlayer):
         doc="""This player's decision""",
         widget=widgets.RadioSelect,
     )
+    unique_id = models.IntegerField()
 
+    def set_unique_id(self):
+        self.unique_id = self.particiapnt.id_in_session
+
+def creating_session(subsession: Subsession):
+    for player in subsession.get_players():
+        player.set_unique_id()
 
 # FUNCTIONS
 def set_payoffs(group: Group):
@@ -73,8 +80,9 @@ class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
         opponent = other_player(player)
+        opponent_data= "{OppenentID: "+ str(opponent.unique_id)+ ", "+ str(opponent) + "}"
         return dict(
-            opponent=opponent,
+            opponent=opponent_data,
             same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
             opponent_decision=opponent.field_display('cooperate'),
