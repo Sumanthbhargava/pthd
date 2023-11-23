@@ -1,4 +1,5 @@
 from otree.api import *
+import json
 
 
 doc = """
@@ -34,8 +35,33 @@ class Player(BasePlayer):
     )
     unique_id = models.IntegerField()
 
+    #variable for recording game events
+    opponent_record = models.LongStringField()
+
     def set_unique_id(self):
         self.unique_id = self.participant.id_in_session
+
+    #method to add to opponent_record during the game
+    def add_opponent_record(self, opponent):
+        # Initialize the list if it's empty
+        if not self.field_maybe_none('opponent_record'):
+            records = []
+        else:
+            records = json.loads(self.field_maybe_none('opponent_record'))
+        
+        # Add the new record
+        record = {
+            'round': opponent.round_number,
+            'game': 'A/B',
+            'opponent_id': opponent.unique_id,
+            'your_id': self.unique_id,
+            'opponent_decision': opponent.cooperate,
+            'your_decision': self.cooperate
+        }
+        records.append(record)
+
+        # Save the updated list
+        self.opponent_record = json.dumps(records)
 
 def creating_session(subsession: Subsession):
     for player in subsession.get_players():
@@ -43,6 +69,8 @@ def creating_session(subsession: Subsession):
     
     # Randomly pairs 6 players into 3 pairs before game A
     subsession.group_randomly()
+
+    #define a game variable(initalized as C) which toggles between Game A and Game B. IF round == 1 and game = C then set it to A, other wise if it is A then B and vice versa. 
 
 # FUNCTIONS
 def set_payoffs(group: Group):
@@ -84,12 +112,14 @@ class Results(Page):
     @staticmethod
     def vars_for_template(player: Player):
         opponent = other_player(player)
-        opponent_data= "{OppenentID: "+ str(opponent.unique_id)+ ", "+ str(opponent) + "}"
+        player.add_opponent_record(opponent)
+        opponent_records = json.loads(player.field_maybe_none('opponent_record')) if player.field_maybe_none('opponent_record') else []
         return dict(
             opponent=opponent_data,
             same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
             opponent_decision=opponent.field_display('cooperate'),
+            opponent_records=opponent_records,
         )
 
 
