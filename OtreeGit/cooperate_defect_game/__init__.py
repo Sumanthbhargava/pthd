@@ -20,7 +20,8 @@ class C(BaseConstants):
 
 
 class Subsession(BaseSubsession):
-    pass
+    #define a game variable(initalized as A) which toggles between Game A and Game B. Assuming it gets set to A at the beginning of a round, and in the 'GroupsShufflePage' the game is toggled to game 'B' as it concludes game A.
+    game=models.StringField(initial='A')
 
 
 class Group(BaseGroup):
@@ -70,8 +71,11 @@ def creating_session(subsession: Subsession):
     # Randomly pairs 6 players into 3 pairs before game A
     subsession.group_randomly()
 
-    #define a game variable(initalized as C) which toggles between Game A and Game B. IF round == 1 and game = C then set it to A, other wise if it is A then B and vice versa. 
-
+    """if subsession.game == 'C':
+        subsession.game = 'A'
+    elif subsession.game == 'A':
+        subsession.game = 'B'
+"""
 # FUNCTIONS
 def set_payoffs(group: Group):
     for p in group.get_players():
@@ -131,5 +135,10 @@ class GroupsShufflePage(WaitPage):
     def after_all_players_arrive(subsession):
         #Shuffle players into new random pairs before they enter game B
         subsession.group_randomly()
+
+        if subsession.game == 'A':
+            subsession.game = 'B'
+        else:
+            pass
 
 page_sequence = [Introduction, Decision, ResultsWaitPage, Results, GroupsShufflePage, Decision, ResultsWaitPage, Results]
