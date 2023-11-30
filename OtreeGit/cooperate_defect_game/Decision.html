@@ -1,6 +1,24 @@
 {{ block title }}Your Choice{{ endblock }}
 {{ block content }}
-
+    <head>
+        <style>
+            .game-records {
+                border-collapse: collapse;
+                width: 100%;
+            }
+            .game-records th, .game-records td {
+                border: 1px solid black;
+                padding: 8px;
+                text-align: left;
+            }
+            .game-records th {
+                background-color: #f2f2f2;
+            }
+            .game-records tr:nth-child(even) {
+                background-color: #f9f9f9;
+            }
+        </style>
+    </head>
     <div class="form-group required">
         <table class="table table-bordered text-center" style="width: auto; margin: auto">
             <tr>
@@ -24,6 +42,35 @@
             </tr>
         </table>
     </div>
+
+    <body>
+    
+        <h3>Opponent's Past Records:</h3>
+        <table class="game-records" border="1">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Game</th>
+                    <th>Opponent ID</th>
+                    <th>Opponent's Decision</th>
+                    <th>Opponent's Opponent ID</th>
+                    <th>Opponent's Opponent Decision</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in opponent_records %}
+                <tr>
+                    <td>{{ record.round }}</td>
+                    <td>{{ record.game }}</td>
+                    <td>{{ record.your_id }}</td>
+                    <td>{{ record.your_decision }}</td>
+                    <td>{{ record.opponent_id }}</td>
+                    <td>{{ record.opponent_decision }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </body>
 
     <p>Here you can chat with the other participant.</p>
 

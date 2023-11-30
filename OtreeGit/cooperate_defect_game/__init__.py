@@ -56,8 +56,8 @@ class Player(BasePlayer):
             'game': 'A/B',
             'opponent_id': opponent.unique_id,
             'your_id': self.unique_id,
-            'opponent_decision': opponent.cooperate,
-            'your_decision': self.cooperate
+            'opponent_decision': "Cooperated" if opponent.cooperate == True else "Defected",
+            'your_decision': "Cooperated" if self.cooperate == True else "Defected"
         }
         records.append(record)
 
@@ -106,6 +106,16 @@ class Introduction(Page):
 class Decision(Page):
     form_model = 'player'
     form_fields = ['cooperate']
+    @staticmethod
+    def vars_for_template(player: Player):
+        game_AB= player.subsession.game
+        opponent = other_player(player)
+        opponent_records = json.loads(opponent.field_maybe_none('opponent_record')) if opponent.field_maybe_none('opponent_record') else []
+
+        return dict(
+            opponent_records= opponent_records,
+            game_AB = game_AB,
+        )
 
 
 class ResultsWaitPage(WaitPage):
@@ -119,7 +129,7 @@ class Results(Page):
         player.add_opponent_record(opponent)
         opponent_records = json.loads(player.field_maybe_none('opponent_record')) if player.field_maybe_none('opponent_record') else []
         return dict(
-            opponent=opponent_data,
+            opponent=opponent_records,
             same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
             opponent_decision=opponent.field_display('cooperate'),
