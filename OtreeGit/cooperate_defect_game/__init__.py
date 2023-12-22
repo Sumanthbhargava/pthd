@@ -17,7 +17,18 @@ class C(BaseConstants):
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
     PAYOFF_D = cu(0)
-
+    PAYOFF_MATRIX_A = {
+        (False, True): cu(300),  
+        (True, True): cu(200),
+        (False, False): cu(100),
+        (True, False): cu(0),
+    }
+    PAYOFF_MATRIX_B = {
+        (False, True): cu(150), 
+        (True, True): cu(100),
+        (False, False): cu(50),
+        (True, False): cu(0),
+    }
 
 class Subsession(BaseSubsession):
     #define a game variable(initalized as A) which toggles between Game A and Game B. Assuming it gets set to A at the beginning of a round, and in the 'GroupsShufflePage' the game is toggled to game 'B' as it concludes game A.
@@ -91,12 +102,13 @@ def other_player(player: Player):
 
 
 def set_payoff(player: Player):
-    payoff_matrix = {
-        (False, True): C.PAYOFF_A,
-        (True, True): C.PAYOFF_B,
-        (False, False): C.PAYOFF_C,
-        (True, False): C.PAYOFF_D,
-    }
+    game_AB = player.subsession.game
+    if game_AB == 'A':
+        payoff_matrix = C.PAYOFF_MATRIX_A
+    elif game_AB == 'B':
+        payoff_matrix = C.PAYOFF_MATRIX_B
+    else:
+        raise ValueError(f"Invalid game type: {game_AB}")
     other = other_player(player)
     player.payoff = payoff_matrix[(player.cooperate, other.cooperate)]
 
@@ -113,11 +125,26 @@ class Decision(Page):
     @staticmethod
     def vars_for_template(player: Player):
         game_AB= player.subsession.game
+        if game_AB == 'A':
+            payoff_matrix = C.PAYOFF_MATRIX_A
+        elif game_AB == 'B':
+            payoff_matrix = C.PAYOFF_MATRIX_B
+        else:
+            raise ValueError(f"Invalid game type: {game_AB}")
+
+        
+        payoffs = {
+            'cooperate_cooperate': payoff_matrix[(True, True)],
+            'cooperate_defect': payoff_matrix[(True, False)],
+            'defect_cooperate': payoff_matrix[(False, True)],
+            'defect_defect': payoff_matrix[(False, False)],
+        }
         opponent = other_player(player)
         opponent_records = json.loads(opponent.field_maybe_none('opponent_record')) if opponent.field_maybe_none('opponent_record') else []
         last_record = opponent_records[-1] if opponent_records else None
         current_round = player.round_number
         return dict(
+            payoffs=payoffs,
             opponent_records= opponent_records,
             last_record= last_record,
             game_AB = game_AB,
