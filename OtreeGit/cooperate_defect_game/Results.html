@@ -28,20 +28,20 @@
     <p>
         As a result, you earned {{ player.payoff }}.
     </p>
-    <h3>Opponent's Past Records:</h3>
+    <h3>Your Past Results:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>
                 <th>Round</th>
                 <th>Game</th>
-                <th>Opponent ID</th>
+                <th>Your ID</th>
+                <th>Your's Decision</th>
+                <th>Opponent's ID</th>
                 <th>Opponent's Decision</th>
-                <th>Opponent's Opponent ID</th>
-                <th>Opponent's Opponent Decision</th>
             </tr>
         </thead>
         <tbody>
-            {% for record in opponent_records %}
+            {% for record in self_records %}
             <tr>
                 <td>{{ record.round }}</td>
                 <td>{{ record.game }}</td>
