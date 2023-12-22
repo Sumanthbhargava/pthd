@@ -54,7 +54,7 @@ class Player(BasePlayer):
         self.unique_id = self.participant.id_in_session
 
     #method to add to game_record during the game
-    def add_game_record(self, opponent):
+    def add_game_record(self, opponent, self_payoff, opponent_payoff):
         # Initialize the list if it's empty
         if not self.field_maybe_none('game_record'):
             records = []
@@ -63,12 +63,14 @@ class Player(BasePlayer):
         
         # Add the new record
         record = {
-            'round': opponent.round_number,
-            'game': opponent.subsession.game,
+            'round': self.round_number,
+            'game': self.subsession.game,
             'opponent_id': opponent.unique_id,
             'your_id': self.unique_id,
-            'opponent_decision': "Cooperate" if opponent.field_maybe_none('cooperate') == True else "Defect",
-            'your_decision': "Cooperate" if self.field_maybe_none('cooperate') == True else "Defect"
+            'opponent_decision': "Cooperate" if opponent.cooperate else "Defect",
+            'your_decision': "Cooperate" if self.cooperate else "Defect",
+            'your_payoff': float(self_payoff),
+            'opponent_payoff': float(opponent_payoff)
         }
         records.append(record)
 
@@ -91,11 +93,14 @@ def creating_session(subsession: Subsession):
 def set_payoffs_and_records(group: Group):
     for p in group.get_players():
         set_payoff(p)
-        update_game_record(p)
 
-def update_game_record(player: Player):
+    for p in group.get_players():
+        opponent = other_player(p)
+        update_game_record(p, p.payoff, opponent.payoff)
+
+def update_game_record(player: Player, self_payoff, opponent_payoff):
     opponent = other_player(player)
-    player.add_game_record(opponent)
+    player.add_game_record(opponent, self_payoff, opponent_payoff)
 
 def other_player(player: Player):
     return player.get_others_in_group()[0]

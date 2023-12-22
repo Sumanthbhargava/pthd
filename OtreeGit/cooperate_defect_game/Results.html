@@ -36,8 +36,10 @@
                 <th>Game</th>
                 <th>Your ID</th>
                 <th>Your's Decision</th>
+                <th>Your Payoff</th>
                 <th>Opponent's ID</th>
                 <th>Opponent's Decision</th>
+                <th>Opponent's Payoff</th>
             </tr>
         </thead>
         <tbody>
@@ -47,8 +49,10 @@
                 <td>{{ record.game }}</td>
                 <td>{{ record.your_id }}</td>
                 <td>{{ record.your_decision }}</td>
+                <td>{{ record.your_payoff }}</td>
                 <td>{{ record.opponent_id }}</td>
                 <td>{{ record.opponent_decision }}</td>
+                <td>{{ record.opponent_payoff }}</td>
             </tr>
             {% endfor %}
         </tbody>
