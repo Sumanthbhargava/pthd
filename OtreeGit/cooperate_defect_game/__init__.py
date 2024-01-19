@@ -84,6 +84,10 @@ def creating_session(subsession: Subsession):
     # Randomly pairs 6 players into 3 pairs before game A
     subsession.group_randomly()
 
+    # Assign one player as the bot
+    bot_player = subsession.get_players()[0]  # Example: Assigns the first player as the bot
+    bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
+
     """if subsession.game == 'C':
         subsession.game = 'A'
     elif subsession.game == 'A':
@@ -127,8 +131,16 @@ class Introduction(Page):
 class Decision(Page):
     form_model = 'player'
     form_fields = ['cooperate']
+
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.vars.get('is_bot', False):
+            return 10  # Set a 10-second timeout for the bot
+        return None  # Normal timeout for human players
+
     @staticmethod
     def vars_for_template(player: Player):
+        is_bot = player.participant.vars.get('is_bot', False) # Sent to HTML to display a different decision page for bot
         game_AB= player.subsession.game
         if game_AB == 'A':
             payoff_matrix = C.PAYOFF_MATRIX_A
@@ -150,6 +162,7 @@ class Decision(Page):
         last_record = self_records[-1] if self_records else None
         current_round = player.round_number
         return dict(
+            is_bot=is_bot,
             payoffs=payoffs,
             opponent_records= opponent_records,
             last_record= last_record,
@@ -159,6 +172,21 @@ class Decision(Page):
             my_decision=player.field_maybe_none('cooperate'),
             opponent_decision=opponent.field_maybe_none('cooperate'),
         )
+    @staticmethod
+    def before_next_page(player: Player, timeout_happened): #Bot logic
+        # Check if the player is a bot
+        if player.participant.vars.get('is_bot', False) and timeout_happened:
+            opponent= player.get_others_in_group()[0]
+            opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
+            if opponent_records != []:
+                latest_record= opponent_records[-1]
+                print(latest_record)
+                if latest_record['your_decision'] == "Cooperate":
+                    player.cooperate = True  # Cooperate if opponent has cooperated
+                else:
+                    player.cooperate = False  # Defect if opponent has defected 
+            else: 
+                player.cooperate = True  # Cooperate in game A
 
 
 class ResultsWaitPage(WaitPage):
