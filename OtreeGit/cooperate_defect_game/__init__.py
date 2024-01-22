@@ -18,16 +18,16 @@ class C(BaseConstants):
     PAYOFF_C = cu(100)
     PAYOFF_D = cu(0)
     PAYOFF_MATRIX_A = {
-        (False, True): cu(300),  
-        (True, True): cu(200),
-        (False, False): cu(100),
+        (False, True): cu(5),  
+        (True, True): cu(3),
+        (False, False): cu(1),
         (True, False): cu(0),
     }
     PAYOFF_MATRIX_B = {
-        (False, True): cu(150), 
-        (True, True): cu(100),
-        (False, False): cu(50),
-        (True, False): cu(0),
+        (False, True): cu(5), 
+        (True, True): cu(3),
+        (False, False): cu(0),
+        (True, False): cu(1),
     }
 
 class Subsession(BaseSubsession):
