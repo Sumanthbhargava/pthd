@@ -20,16 +20,15 @@
 {% if last_record %}
 <h3>Results of game {{ last_record.game }} </h3>
     <p>
-        {% if last_record.your_decision == last_record.opponent_decision %}
-            Both of you chose to {{ last_record.your_decision }}.
-        {% else %}
-            You chose to {{ last_record.your_decision }} and the other participant chose to {{ last_record.opponent_decision }}.
-        {% endif %}
+        In the last round:
     </p>
-
     <p>
-        As a result, you earned {{ player.payoff }}.
+        You chose to {{ last_record.your_decision }} and your opponent chose to {{ last_record.opponent_decision }}. As a result, you earned {{ player.payoff }}.
+    </p>
+    <p>
+        Now you will play game B. Keep in mind that your opponent may have changed.
     </p> 
+    <h4>Your opponent has ...</h4>
 {% endif %}  
 {% if is_bot %}
     <h3>Processing...</h3>

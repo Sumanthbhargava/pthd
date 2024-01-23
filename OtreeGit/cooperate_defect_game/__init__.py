@@ -46,7 +46,8 @@ class Player(BasePlayer):
         widget=widgets.RadioSelect,
     )
     unique_id = models.IntegerField()
-
+    
+    game_pay = models.FloatField(initial=0.00)
     #variable for recording game events
     game_record = models.LongStringField()
 
@@ -57,7 +58,10 @@ class Player(BasePlayer):
     def add_game_record(self, opponent, self_payoff, opponent_payoff):
         # Initialize the list if it's empty
         if not self.field_maybe_none('game_record'):
-            records = []
+            if self.round_number>1:
+                records = get_last_details(self)
+            else:
+                records = []
         else:
             records = json.loads(self.field_maybe_none('game_record'))
         
@@ -69,8 +73,8 @@ class Player(BasePlayer):
             'your_id': self.unique_id,
             'opponent_decision': "Cooperate" if opponent.cooperate else "Defect",
             'your_decision': "Cooperate" if self.cooperate else "Defect",
-            'your_payoff': float(self_payoff),
-            'opponent_payoff': float(opponent_payoff)
+            'your_payoff': self_payoff,
+            'opponent_payoff': opponent_payoff
         }
         records.append(record)
 
@@ -100,7 +104,10 @@ def set_payoffs_and_records(group: Group):
 
     for p in group.get_players():
         opponent = other_player(p)
-        update_game_record(p, p.payoff, opponent.payoff)
+        update_game_record(p, p.game_pay, opponent.game_pay)
+
+    for p in group.get_players():
+        add_payoff(p)
 
 def update_game_record(player: Player, self_payoff, opponent_payoff):
     opponent = other_player(player)
@@ -119,9 +126,14 @@ def set_payoff(player: Player):
     else:
         raise ValueError(f"Invalid game type: {game_AB}")
     opponent = other_player(player)
-    player.payoff = payoff_matrix[(player.cooperate, opponent.cooperate)]
+    player.game_pay = float(payoff_matrix[(player.cooperate, opponent.cooperate)])
 
+def get_last_details(player: Player):
+    player_last_round= player.in_round(player.round_number-1)
+    return json.loads(player_last_round.field_maybe_none('game_record'))
 
+def add_payoff(player:Player):
+    player.payoff = player.payoff + cu(player.game_pay)
 
 # PAGES
 class Introduction(Page):
@@ -158,6 +170,8 @@ class Decision(Page):
         }
         opponent = other_player(player)
         opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
+        if player.round_number > 1 and opponent_records == []:
+            opponent_records = get_last_details(opponent)
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
         last_record = self_records[-1] if self_records else None
         current_round = player.round_number
@@ -180,7 +194,6 @@ class Decision(Page):
             opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
             if opponent_records != []:
                 latest_record= opponent_records[-1]
-                print(latest_record)
                 if latest_record['your_decision'] == "Cooperate":
                     player.cooperate = True  # Cooperate if opponent has cooperated
                 else:
