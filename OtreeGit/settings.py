@@ -15,7 +15,7 @@ SESSION_CONFIGS = [
         name='public_goods_simple', display_name="Simple Public Good", app_sequence=['public_goods_simple'], num_demo_participants=3, SESSION_FIELDS= ["multiplier", "last_multiplier"], PARTICIPANT_FIELDS=["endowment"]
     ), #setting Session Fields to store current round multiplier and last round multiplier
     dict(
-        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['CDG_intro','cooperate_defect_game'], num_demo_participants=4, use_browser_bots=False
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['CDG_intro','cooperate_defect_game'], num_demo_participants=2, use_browser_bots=False
     ),
     
 ]
@@ -29,10 +29,7 @@ SESSION_CONFIG_DEFAULTS = dict(
     real_world_currency_per_point=0.01, participation_fee=0.00, doc=""
 )
 
-PARTICIPANT_FIELDS = [
-    'game_records',
-    'Total_payoff'
-]
+PARTICIPANT_FIELDS = []
 SESSION_FIELDS = []
 
 # ISO-639 code

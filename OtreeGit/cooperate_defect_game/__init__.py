@@ -13,10 +13,12 @@ class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 2
     NUM_ROUNDS = 3
+    L = 1 
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
     PAYOFF_D = cu(0)
+    CONDITION = 4
     PAYOFF_MATRIX_A = {
         (False, True): cu(5),  
         (True, True): cu(3),
@@ -92,11 +94,6 @@ def creating_session(subsession: Subsession):
     bot_player = subsession.get_players()[0]  # Example: Assigns the first player as the bot
     bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
 
-    """if subsession.game == 'C':
-        subsession.game = 'A'
-    elif subsession.game == 'A':
-        subsession.game = 'B'
-"""
 # FUNCTIONS
 def set_payoffs_and_records(group: Group):
     for p in group.get_players():
@@ -129,17 +126,37 @@ def set_payoff(player: Player):
     player.game_pay = float(payoff_matrix[(player.cooperate, opponent.cooperate)])
 
 def get_last_details(player: Player):
-    player_last_round= player.in_round(player.round_number-1)
+    player_last_round = player.in_round(player.round_number-1)
     return json.loads(player_last_round.field_maybe_none('game_record'))
 
-def add_payoff(player:Player):
+def add_payoff(player: Player):
     player.payoff = player.payoff + cu(player.game_pay)
 
+def get_payoff_matrix(player: Player):
+    game_AB = player.subsession.game
+    if game_AB == 'A':
+        payoff_matrix = C.PAYOFF_MATRIX_A
+    elif game_AB == 'B':
+        payoff_matrix = C.PAYOFF_MATRIX_B
+    else:
+        raise ValueError(f"Invalid game type: {game_AB}")
+
+    
+    return {
+        'cooperate_cooperate': payoff_matrix[(True, True)],
+        'cooperate_defect': payoff_matrix[(True, False)],
+        'defect_cooperate': payoff_matrix[(False, True)],
+        'defect_defect': payoff_matrix[(False, False)],
+    }
+
+def get_player_details(player: Player):
+    records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
+    if player.round_number > 1:
+        if records == []:
+            records = get_last_details(player)
+    return records
+        
 # PAGES
-class Introduction(Page):
-    timeout_seconds = 100
-
-
 class Decision(Page):
     form_model = 'player'
     form_fields = ['cooperate']
@@ -153,38 +170,27 @@ class Decision(Page):
     @staticmethod
     def vars_for_template(player: Player):
         is_bot = player.participant.vars.get('is_bot', False) # Sent to HTML to display a different decision page for bot
-        game_AB= player.subsession.game
-        if game_AB == 'A':
-            payoff_matrix = C.PAYOFF_MATRIX_A
-        elif game_AB == 'B':
-            payoff_matrix = C.PAYOFF_MATRIX_B
-        else:
-            raise ValueError(f"Invalid game type: {game_AB}")
-
-        
-        payoffs = {
-            'cooperate_cooperate': payoff_matrix[(True, True)],
-            'cooperate_defect': payoff_matrix[(True, False)],
-            'defect_cooperate': payoff_matrix[(False, True)],
-            'defect_defect': payoff_matrix[(False, False)],
-        }
+        payoffs = get_payoff_matrix(player)
         opponent = other_player(player)
-        opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
-        if player.round_number > 1 and opponent_records == []:
-            opponent_records = get_last_details(opponent)
-        self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
-        last_record = self_records[-1] if self_records else None
+        self_records = get_player_details(player)
+        opponent_records = get_player_details(opponent)
+        last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
+        filtered_records = []
+        l= C.L if C.L < current_round else current_round
+        opponent_records = opponent_records[-l:]
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
-            opponent_records= opponent_records,
-            last_record= last_record,
-            game_AB = game_AB,
+            opponent_records = opponent_records,
+            filtered_records = filtered_records,
+            last_record = last_record,
+            game_AB = player.subsession.game,
             current_round = current_round,
-            same_choice=player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
-            my_decision=player.field_maybe_none('cooperate'),
-            opponent_decision=opponent.field_maybe_none('cooperate'),
+            same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
+            my_decision = player.field_maybe_none('cooperate'),
+            opponent_decision = opponent.field_maybe_none('cooperate'),
+            condition = C.CONDITION,
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
@@ -208,9 +214,20 @@ class ResultsWaitPage(WaitPage):
 
 class Results(Page):
     @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == C.NUM_ROUNDS
+
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.vars.get('is_bot', False):
+            return 30  # Set a 10-second timeout for the bot
+        return None  # Normal timeout for human players
+    
+    @staticmethod
     def vars_for_template(player: Player):
         opponent = other_player(player)
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
+        last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
         return dict(
             same_choice=player.cooperate == opponent.cooperate,
@@ -218,13 +235,14 @@ class Results(Page):
             opponent_decision=opponent.field_display('cooperate'),
             self_records=self_records,
             current_round = current_round,
+            last_record= last_record,
         )
 
 
 class GroupsShufflePage(WaitPage):
     #Wait for all 6 players to be done with game A
     wait_for_all_groups = True 
-
+    
     @staticmethod
     def after_all_players_arrive(subsession):
         #Shuffle players into new random pairs before they enter game B
@@ -235,4 +253,4 @@ class GroupsShufflePage(WaitPage):
         else:
             pass
 
-page_sequence = [Decision, ResultsWaitPage, GroupsShufflePage, Decision,ResultsWaitPage, Results]
+page_sequence = [Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, Results]
