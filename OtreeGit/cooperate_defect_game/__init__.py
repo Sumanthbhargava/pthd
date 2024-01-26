@@ -12,8 +12,8 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 3
-    L = 1 
+    NUM_ROUNDS = 1
+    L = 2
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
@@ -45,11 +45,11 @@ class Player(BasePlayer):
     cooperate = models.BooleanField(
         choices=[[True, 'Cooperate'], [False, 'Defect']],
         doc="""This player's decision""",
-        widget=widgets.RadioSelect,
+        widget = widgets.RadioSelect,
     )
     unique_id = models.IntegerField()
     
-    game_pay = models.FloatField(initial=0.00)
+    game_pay = models.FloatField(initial=0.0)
     #variable for recording game events
     game_record = models.LongStringField()
 
@@ -156,6 +156,50 @@ def get_player_details(player: Player):
             records = get_last_details(player)
     return records
         
+def get_filtered_records(records, current_round):
+    condition = C.CONDITION
+    l= C.L if C.L < current_round else current_round
+    if condition == 1 or condition == 2:
+        filtered_records = [record for record in records if record['game'] == 'A']
+        return filtered_records[-l:]
+    elif condition == 3 or condition == 4:
+        filtered_records = get_restructured_data(records)
+        return filtered_records[-l:]
+    else:
+        return records
+
+def get_restructured_data(records):
+    # Initialize a new list to hold the restructured records
+    restructured_records = []
+
+    # Assuming each round has both a game A and a game B entry
+    rounds = set(record['round'] for record in records)
+
+    for round in rounds:
+        record_a = next((r for r in records if r['round'] == round and r['game'] == 'A'), None)
+        record_b = next((r for r in records if r['round'] == round and r['game'] == 'B'), None)
+
+        restructured_record = {
+            "round": round,
+            "opponents_decision_in_game_A": record_a['your_decision'] if record_a else None,
+            "opponents_opponent_decision_in_game_A": record_a['opponent_decision'] if record_a else None,
+            "opponents_decision_in_game_B": record_b['your_decision'] if record_b else None,
+            "opponents_opponent_decision_in_game_B": record_b['opponent_decision'] if record_b else None,
+        }
+        
+        restructured_records.append(restructured_record)
+
+    return restructured_records
+
+def get_last_choice(records):
+    last_choice = records[-1]['your_decision'] if records else None
+    if last_choice == 'Cooperate':
+        return 'Cooperated'
+    elif last_choice == 'Defect':
+        return 'Defected'
+    else:
+        return None
+
 # PAGES
 class Decision(Page):
     form_model = 'player'
@@ -174,11 +218,10 @@ class Decision(Page):
         opponent = other_player(player)
         self_records = get_player_details(player)
         opponent_records = get_player_details(opponent)
+        opponent_last_choice = get_last_choice(opponent_records)
         last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
-        filtered_records = []
-        l= C.L if C.L < current_round else current_round
-        opponent_records = opponent_records[-l:]
+        filtered_records = get_filtered_records(opponent_records, current_round)
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
@@ -191,6 +234,7 @@ class Decision(Page):
             my_decision = player.field_maybe_none('cooperate'),
             opponent_decision = opponent.field_maybe_none('cooperate'),
             condition = C.CONDITION,
+            opponent_last_choice = opponent_last_choice,
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
@@ -224,7 +268,9 @@ class Results(Page):
         return None  # Normal timeout for human players
     
     @staticmethod
-    def vars_for_template(player: Player):
+    def vars_for_template(player: Player,):
+        final_payoff = player.participant.payoff
+        final_amount = final_payoff.to_real_world_currency(player.session)
         opponent = other_player(player)
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
         last_record = self_records[-1] if self_records != [] else None
@@ -236,6 +282,8 @@ class Results(Page):
             self_records=self_records,
             current_round = current_round,
             last_record= last_record,
+            final_payoff = final_payoff,
+            final_amount = final_amount,
         )
 
 

@@ -26,9 +26,9 @@
         You chose to {{ last_record.your_decision }} and your opponent chose to {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
     </p>
     <p>
-        Now you will play game B. Keep in mind that your opponent may have changed.
+        Now you will play game {{ game_AB }}. Keep in mind that your opponent may have changed.
     </p> 
-    <h4>Your opponent has ...</h4>
+    <h4>Your opponent has {{ opponent_last_choice }} in the previous {% if game_AB == 'B' %} game. {% else %} game of the previous round. {% endif %}</h4>
 {% endif %}  
 {% if is_bot %}
     <h3>Processing...</h3>
@@ -59,37 +59,138 @@
         </table>
     </div>
 {% endif %}
-
-{% if opponent_records %}
-<h3>Current Opponent's Past Records:</h3>
-<table class="game-records" border="1">
-    <thead>
-        <tr>
-            <th>Round</th>
-            <th>Game</th>
-            <th>Opponent ID</th>
-            <th>Opponent's Decision</th>
-            <th>Opponent's Payoff</th>
-            <th>Opponent's Opponent ID</th>
-            <th>Opponent's Opponent Decision</th>
-            <th>Opponent's Opponent Payoff</th>
-        </tr>
-    </thead>
-    <tbody>
-        {% for record in opponent_records %}
-        <tr>
-            <td>{{ record.round }}</td>
-            <td>{{ record.game }}</td>
-            <td>{{ record.your_id }}</td>
-            <td>{{ record.your_decision }}</td>
-            <td>{{ record.your_payoff }}</td>
-            <td>{{ record.opponent_id }}</td>
-            <td>{{ record.opponent_decision }}</td>
-            <td>{{ record.opponent_payoff }}</td>
-        </tr>
-        {% endfor %}
-    </tbody>
-</table>
+{% if condition == 1 %}
+    {% if filtered_records %}
+    <h3>Current Opponent's Past Records:</h3>
+    <table class="game-records" border="1">
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Game</th>
+                <th>Opponent's Decision in game A</th>
+                <th>Opponent's Payoff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in filtered_records %}
+            <tr>
+                <td>{{ record.round }}</td>
+                <td>{{ record.game }}</td>
+                <td>{{ record.your_decision }}</td>
+                <td>{{ record.your_payoff }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% elif condition == 2 %}
+    {% if filtered_records %}
+    <h3>Current Opponent's Past Records:</h3>
+    <table class="game-records" border="1">
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Game</th>
+                <th>Opponent's Decision in game A</th>
+                <th>Opponent's Payoff</th>
+                <th>Opponent's Opponent Decision in Game A</th>
+                <th>Opponent's Opponent Payoff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in filtered_records %}
+            <tr>
+                <td>{{ record.round }}</td>
+                <td>{{ record.game }}</td>
+                <td>{{ record.your_decision }}</td>
+                <td>{{ record.your_payoff }}</td>
+                <td>{{ record.opponent_decision }}</td>
+                <td>{{ record.opponent_payoff }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
+{% elif condition == 3 %}
+    {% if filtered_records %}
+    <h3>Current Opponent's Past Records:</h3>
+    <table class="game-records" border="1">
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Opponent's Decision in Game A</th>
+                <th>Opponent's Decision in Game B</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in filtered_records %}
+            <tr>
+                <td>{{ record.round }}</td>
+                <td>{{ record.opponents_decision_in_game_A }}</td>
+                <td>{{ record.opponents_decision_in_game_B }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
+    {% endif %}
+{% elif condition == 4 %}
+    {% if filtered_records %}
+    <h3>Current Opponent's Past Records:</h3>
+    <table class="game-records" border="1">
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Opponent's Decision in Game A</th>
+                <th>Opponent's Opponent Decision in Game A</th>
+                <th>Opponent's Decision in Game B</th>
+                <th>Opponent's Opponent Decision in Game B</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in filtered_records %}
+            <tr>
+                <td>{{ record.round }}</td>
+                <td>{{ record.opponents_decision_in_game_A }}</td>
+                <td>{{ record.opponents_opponent_decision_in_game_A }}</td>
+                <td>{{ record.opponents_decision_in_game_B }}</td>
+                <td>{{ record.opponents_opponent_decision_in_game_B }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>    
+    {% endif %}
+{% else %}
+    {% if filtered_records %}
+    <h3>Current Opponent's Past Records:</h3>
+    <table class="game-records" border="1">
+        <thead>
+            <tr>
+                <th>Round</th>
+                <th>Game</th>
+                <th>Opponent ID</th>
+                <th>Opponent's Decision</th>
+                <th>Opponent's Payoff</th>
+                <th>Opponent's Opponent ID</th>
+                <th>Opponent's Opponent Decision</th>
+                <th>Opponent's Opponent Payoff</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for record in filtered_records %}
+            <tr>
+                <td>{{ record.round }}</td>
+                <td>{{ record.game }}</td>
+                <td>{{ record.your_id }}</td>
+                <td>{{ record.your_decision }}</td>
+                <td>{{ record.your_payoff }}</td>
+                <td>{{ record.opponent_id }}</td>
+                <td>{{ record.opponent_decision }}</td>
+                <td>{{ record.opponent_payoff }}</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    {% endif %}
 {% endif %}
     <p>Here you can chat with the other participant.</p>
 
