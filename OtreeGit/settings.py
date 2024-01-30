@@ -3,6 +3,11 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['CDG_intro','cooperate_defect_game'], num_demo_participants=4, number_of_bots=2, past_records_display_condition_1_to_4 = 4, no_of_past_rounds_to_be_displayed = 2,
+    ),
+]
+
+"""dict(
         name='guess_two_thirds',
         display_name="Guess 2/3 of the Average",
         app_sequence=['guess_two_thirds', 'payment_info'],
@@ -14,19 +19,14 @@ SESSION_CONFIGS = [
     dict(
         name='public_goods_simple', display_name="Simple Public Good", app_sequence=['public_goods_simple'], num_demo_participants=3, SESSION_FIELDS= ["multiplier", "last_multiplier"], PARTICIPANT_FIELDS=["endowment"]
     ), #setting Session Fields to store current round multiplier and last round multiplier
-    dict(
-        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['CDG_intro','cooperate_defect_game'], num_demo_participants=2, use_browser_bots=False
-    ),
-    
-]
-
+"""
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
 # the session config can be accessed from methods in your apps as self.session.config,
 # e.g. self.session.config['participation_fee']
 
 SESSION_CONFIG_DEFAULTS = dict(
-    real_world_currency_per_point=0.01, participation_fee=0.00, doc=""
+    real_world_currency_per_point=0.01, participation_fee=0.00, doc="", 
 )
 
 PARTICIPANT_FIELDS = []

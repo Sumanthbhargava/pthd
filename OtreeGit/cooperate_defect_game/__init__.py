@@ -1,6 +1,6 @@
 from otree.api import *
 import json
-
+import random
 
 doc = """
 This is a one-shot "Prisoner's Dilemma". Two players are asked separately
@@ -12,13 +12,13 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 3
     L = 2
+    CONDITION = 4
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
     PAYOFF_D = cu(0)
-    CONDITION = 4
     PAYOFF_MATRIX_A = {
         (False, True): cu(5),  
         (True, True): cu(3),
@@ -90,11 +90,18 @@ def creating_session(subsession: Subsession):
     # Randomly pairs 6 players into 3 pairs before game A
     subsession.group_randomly()
 
-    # Assign one player as the bot
-    bot_player = subsession.get_players()[0]  # Example: Assigns the first player as the bot
-    bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
+    for i in range(0,len(subsession.get_players())):
+        if i == subsession.session.config['number_of_bots']:
+            break
+        bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
+        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
 
 # FUNCTIONS
+
+def set_payoffs_and_records_for_all_groups(subsession: Subsession):
+    for group in subsession.get_groups():
+        set_payoffs_and_records(group)
+
 def set_payoffs_and_records(group: Group):
     for p in group.get_players():
         set_payoff(p)
@@ -156,9 +163,10 @@ def get_player_details(player: Player):
             records = get_last_details(player)
     return records
         
-def get_filtered_records(records, current_round):
-    condition = C.CONDITION
-    l= C.L if C.L < current_round else current_round
+def get_filtered_records(player: Player, records, current_round):
+    condition = player.session.config['past_records_display_condition_1_to_4']
+    l_rounds = player.session.config['no_of_past_rounds_to_be_displayed']
+    l= l_rounds if l_rounds < current_round else current_round
     if condition == 1 or condition == 2:
         filtered_records = [record for record in records if record['game'] == 'A']
         return filtered_records[-l:]
@@ -221,7 +229,7 @@ class Decision(Page):
         opponent_last_choice = get_last_choice(opponent_records)
         last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
-        filtered_records = get_filtered_records(opponent_records, current_round)
+        filtered_records = get_filtered_records(player, opponent_records, current_round)
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
@@ -233,27 +241,31 @@ class Decision(Page):
             same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
             my_decision = player.field_maybe_none('cooperate'),
             opponent_decision = opponent.field_maybe_none('cooperate'),
-            condition = C.CONDITION,
+            condition = player.session.config['past_records_display_condition_1_to_4'],
             opponent_last_choice = opponent_last_choice,
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
         # Check if the player is a bot
         if player.participant.vars.get('is_bot', False) and timeout_happened:
-            opponent= player.get_others_in_group()[0]
-            opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
-            if opponent_records != []:
-                latest_record= opponent_records[-1]
-                if latest_record['your_decision'] == "Cooperate":
-                    player.cooperate = True  # Cooperate if opponent has cooperated
-                else:
-                    player.cooperate = False  # Defect if opponent has defected 
-            else: 
-                player.cooperate = True  # Cooperate in game A
-
+            if player.unique_id == 1:
+                opponent= player.get_others_in_group()[0]
+                opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
+                if opponent_records != []:
+                    latest_record= opponent_records[-1]
+                    if latest_record['your_decision'] == "Cooperate":
+                        player.cooperate = True  # Cooperate if opponent has cooperated
+                    else:
+                        player.cooperate = False  # Defect if opponent has defected 
+                else: 
+                    player.cooperate = True  # Cooperate in game A
+            else:
+                player.cooperate = random.choice([True, False]) 
+                
 
 class ResultsWaitPage(WaitPage):
-    after_all_players_arrive = set_payoffs_and_records
+    after_all_players_arrive = set_payoffs_and_records_for_all_groups
+    wait_for_all_groups = True
 
 
 class Results(Page):
@@ -264,7 +276,7 @@ class Results(Page):
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
         if player.participant.vars.get('is_bot', False):
-            return 30  # Set a 10-second timeout for the bot
+            return 300  # Set a 10-second timeout for the bot
         return None  # Normal timeout for human players
     
     @staticmethod
@@ -279,7 +291,7 @@ class Results(Page):
             same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
             opponent_decision=opponent.field_display('cooperate'),
-            self_records=self_records,
+            self_records=None,
             current_round = current_round,
             last_record= last_record,
             final_payoff = final_payoff,
@@ -292,7 +304,7 @@ class GroupsShufflePage(WaitPage):
     wait_for_all_groups = True 
     
     @staticmethod
-    def after_all_players_arrive(subsession):
+    def after_all_players_arrive(subsession: Subsession):
         #Shuffle players into new random pairs before they enter game B
         subsession.group_randomly()
 
