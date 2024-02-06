@@ -1,0 +1,29 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+Information Before Survey
+{% endblock %}
+
+{% block content %}
+
+<hr/>
+
+<p>
+    Now you have finished the main task. Before finishing the study, we ask you to please respond to three questionnaires.
+    Please press the Next button to proceed.
+    <br>
+
+</p>
+
+<!--<input type="text" id="mturkid"/>-->
+<br/>
+{% next_button %}
+<style>
+    #id_feedback {
+        height: 120px;
+    }
+</style>
+
+{% endblock %}
+

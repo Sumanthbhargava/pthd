@@ -1,0 +1,91 @@
+{{ block global_styles  }}
+
+<style>
+    .otree-timer { /* remove default otree timer from top*/
+        display: none;
+        top: 0px;
+    }
+
+    #show-timer { /* show custom otree timer*/
+        display: block;
+    }
+
+
+    #proceed-btn {
+        background: lightgreen;
+        border: none;
+        color: black;
+    }
+
+</style>
+
+{{ endblock }}
+
+{{ block title }}
+You can now be grouped
+{{ endblock }}
+
+{{ block content }}
+
+<body>
+<div class="container-fluid">
+
+
+    <div class="row" style="margin-top: 2rem;">
+        <div class="col-sm-12">
+            <div style="text-align: center">
+                <p> You have now solved the comprehension check and <strong>completed the tutorial</strong>.</p>
+                <h3> Are you still there?</h3>
+            </div>
+            <p style="text-align: center">
+                If you fail to respond by clicking the button before the timeout, you will not be able to continue,
+                as may the other group members.
+
+                Your group members depend on you and will not be able to repeat this study.
+            </p>
+            <div class="otree-timer alert alert-danger" id="show-timer" style="text-align:center;">
+                <p style="text-align:center;">Time left to start the game:
+                    <span style="font-weight: bold" class="otree-timer__time-left" id="time-left">
+
+                              </span>
+                </p>
+            </div>
+
+            <div id="button" style="margin-top: 10px; font-size: 32px">
+                <button name="next_button" id="proceed-btn" class="btn btn-dark btn-large">
+                    Click here to start game!
+                </button>
+            </div>
+            <div style="margin-bottom: 100px">
+                <div></div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    let customTimerEle = document.getElementById('time-left');
+
+    document.addEventListener("DOMContentLoaded", function (event) {
+        $('.otree-timer__time-left').on('update.countdown', function (event) {
+            customTimerEle.innerText = event.offset.totalSeconds;
+        });
+    });
+
+
+    function sayReady() {
+        let msg = new SpeechSynthesisUtterance();
+        // or: de-DE, zh-CN, ja-JP, es-ES
+        msg.language = 'en-US';
+        msg.text = "We found other players. Click START to stay in the group game.";
+        window.speechSynthesis.speak(msg);
+    }
+
+    if (document.hidden) {
+        sayReady();
+    }
+</script>
+</body>
+
+
+{{ endblock }}

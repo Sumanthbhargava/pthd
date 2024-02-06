@@ -1,0 +1,93 @@
+{{ block title }}
+
+    Which of these pictures show cars?
+
+{{ endblock }}
+
+
+{{ block content }}
+
+
+    <p>We are <strong>not interested</strong> in <strong>automatized</strong> or partially automatized answering
+        schemes. In order to show us that you are answering this survey as a person please
+        select <strong>ALL pictures</strong> that <strong>include at least one car:</strong>
+    </p>
+
+
+    <div class="row h-100">
+        <div class="col-xs-1 col-md-12 align-self-center">
+            {{ for k, img in images.items }}
+
+<!--            {{ img }}-->
+
+                <label for="id_captcha{{ img.1 }}">
+                    <img type="image" style="float: right;" width="200" height="200"
+                         id="id_{{ img.1 }}"
+                         name="captcha{{ img.1 }}" class="image-select"
+                         alt="Image" src="{{ static img.0 }}"/>
+                </label>
+
+
+            {{ endfor }}
+        </div>
+
+    </div>
+
+{% next_button%}
+
+
+<!--    {# Include the form elements! #}-->
+        <div style="display: none">{{ formfields }}</div>
+<!--{#    <div>{{ form }}</div>#}-->
+
+<!--    {{ form.errors }}-->
+
+
+{{ endblock }}
+
+
+{{ block styles }}
+
+    <style>
+
+        .selected {
+            border: 0.3em solid darkred;
+        }
+
+    </style>
+
+{{ endblock }}
+
+{{ block scripts }}
+
+    <script>
+        $(document).ready(function () {
+
+            console.log("start!");
+            /*
+            $('.image-select').click(function () {
+                console.log("toggle class?");
+                $(this).toggleClass('selected');
+            });
+            */
+
+            $('input:checkbox').change(
+                function () {
+
+                    // Get last character of id:
+                    let lastchar = $(this).attr("id").slice(-1);
+                    console.log(lastchar);
+
+                    if ($(this).is(':checked')) {
+                        // {#alert('checked');#}
+
+                        $("#id_" + lastchar).addClass('selected');
+                    } else {
+                        $("#id_" + lastchar).removeClass('selected');
+                    }
+                });
+
+        });
+    </script>
+
+{{ endblock }}

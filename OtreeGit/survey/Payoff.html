@@ -1,0 +1,15 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block content %}
+
+<h3>Your payoff is £ {{ payoff }} </h3>
+<!-- 
+Your Payoff is {{ payoff }}
+<hr/> -->
+Please note that your reward will be rounded.
+
+{% next_button%}
+
+
+{% endblock %}

@@ -3,7 +3,7 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['CDG_intro','cooperate_defect_game'], num_demo_participants=4, number_of_bots=2, past_records_display_condition_1_to_4 = 4, no_of_past_rounds_to_be_displayed = 2,
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['gateway','introduction','waitapp','CDG_intro','cooperate_defect_game', 'survey','finish'], num_demo_participants=2, number_of_bots=1, past_records_display_condition_1_to_4 = 4, no_of_past_rounds_to_be_displayed = 2,  completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
 ]
 
@@ -26,10 +26,35 @@ SESSION_CONFIGS = [
 # e.g. self.session.config['participation_fee']
 
 SESSION_CONFIG_DEFAULTS = dict(
-    real_world_currency_per_point=0.01, participation_fee=0.00, doc="", 
+    real_world_currency_per_point=0.01, participation_fee=0.00, doc="", num_rounds=2
 )
 
-PARTICIPANT_FIELDS = []
+PARTICIPANT_FIELDS = [
+    # GROUPING-RELATED:
+    'wait_page_arrival',
+    'group_id', 'grouped', 'time_waited', 'payment_for_wait',
+    'time_end_waiting1',
+    'wait_bonus_paid',
+    'drop_grouping',
+    # GAME-RELATED:
+    # Waiting in game:
+    'wait_page_arrival_game',
+    # Treatments:
+    # 'ef_infop',  # information about the enhancement factor.
+    # Counterbalancing:
+    'account_main',
+    'n_timeout', 'timeout', 'lost', 'group_complete',
+    # Variables to collect information from previous rounds:
+    'round_info', 'cur_round_info', 'past_round_info', 'past_own_info',
+    'past_efs',
+    # Posttask:
+    'nocomm', 'odd_ef',
+    # SVO-RELATED:
+    'start_waiting_svo', 'time_waited_svo', 'timeout_svo',
+    'svo_angle', 'svo_category',
+    # 'svo_selected'
+    # oTree HR:
+    'finished']
 SESSION_FIELDS = []
 
 # ISO-639 code

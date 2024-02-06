@@ -1,0 +1,357 @@
+{{ extends 'otree/WaitPage.html' }}
+{{ block title }}{{ title_text }}{{ endblock }}
+{{ block content }}
+
+
+{{ body_text }}
+<!--<p>-->
+<!--    &lt;!&ndash;    My custom content here.&ndash;&gt;-->
+
+<!--    &lt;!&ndash;    Consumers might still be used... (but likely this is onld)&ndash;&gt;-->
+<!--    &lt;!&ndash;    https://github.com/oTree-org/otree-core/blob/master/otree/channels/consumers.py&ndash;&gt;-->
+
+<!--    [Keep people/show button to submit? (is that possible?)]-->
+
+<!--    this page-->
+<!--    "are you there" on normal page;-->
+<!--    then additional waitpage (assign treatment there)-->
+
+<!--    if group is still large enough but some individuals missed the check (are you there?),-->
+<!--    re-group with set_group_matrix / group by arrival time?-->
+<!--</p>-->
+
+<!--Modal to show debriefing and completion!-->
+<div class="modal fade show" id="debriefModalLong" tabindex="-1" role="dialog" aria-labelledby="debriefModalLongTitle"
+     aria-hidden="true" xmlns="http://www.w3.org/1999/html">
+    <div class="modal-dialog modal-lg" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="exampleModalLongTitle">Study goals</h5>
+                <button type="button" class="close" data-bs-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+
+
+                <p>
+                    Thank you for your interest in this study.
+                    We are sorry that you could not participate.
+                </p>
+
+                <p>
+                    <!--    Please paste this code -->
+                    Click on the link below to go
+                    back to Prolific and claim your
+                    total payment of {{ total_payoff }}
+                    (participation fee of {{ participation_fee }} and
+                    {{ waitpay }} of bonus for waiting).
+                </p>
+
+                <p>
+                    Click <a href="https://app.prolific.co">here</a>
+                    to complete the study.
+                </p>
+
+                <!--                <div class="alert alert-secondary">-->
+                <!--                    <p><strong>Your completion code:</strong></p>-->
+                <!--                    <p style="text-align: center;font-size: larger">{{ player.completion_codew }}</p>-->
+                <!--                </div>-->
+
+                <!--                <p>-->
+                <!--                    Please paste this code back into Amazon's mTurk site to claim your-->
+                <!--&lt;!&ndash;                    TODO!!!&ndash;&gt;-->
+                <!--                    total payment of {{ total_payoff }}-->
+                <!--                    (participation fee of {{ participation_fee }} and-->
+                <!--                    {{ waitpay }} of bonus for waiting).-->
+                <!--                </p>-->
+                <!--                <p>-->
+                <!--                    When you have finished copying and pasting the survey code, you may close this window.-->
+                <!--                </p>-->
+
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{{ if player.max_wait_reached == True }}
+<h4>We are sorry...</h4>
+<p>
+    Not enough other players showed up in time.
+    <!--    <br>Please submit this task with completion code <b>CoSig[generate code]</b> to collect your wait payment.-->
+</p>
+
+
+<h5>Thank you!</h5>
+
+<p>If you have questions or seek more information on this study,
+    please contact us via email: <a href="mailto:expkonstanz@gmail.com">expkonstanz@gmail.com</a>.</p>
+
+<div>
+    <p>You can view a summary of the study goals and get your completion link by clicking on the button below.</p>
+
+    <button type="button" class="btn btn-secondary" data-bs-toggle="modal" data-bs-target="#debriefModalLong">
+        Show study goals and completion link
+    </button>
+    <br>
+    <br>
+
+
+<!--    <p>-->
+<!--        When you have finished copying and pasting the survey code, you may close this window.-->
+<!--    </p>-->
+</div>
+
+<!--<div>-->
+<!--    <button name="next_button" id="id_next" value="True" class="btn btn-secondary btn-large">Next</button>-->
+<!--</div>-->
+
+
+{{ else }}
+<h3> Please wait and do not leave this page...</h3>
+<p>
+    <br>We are waiting for other participants to arrive so we can initialize the group game.
+</p>
+
+
+<div class="alert alert-warning">
+    <p><strong>Do not leave this page</strong>.
+        You will only have <strong>a few seconds to indicate you are still responsive</strong>
+        after we have found enough players.
+        If you are grouped but fail to respond, you cannot be reimbursed.</p>
+</div>
+
+<p>
+    If not sufficiently many others show up before the time runs out,
+    this site will show a button leading you to a completion code to collect a reimbursement
+    for waiting.
+</p>
+<!--<p>-->
+<!--    <strong>-->
+<!--        Currently [ others_there ] Players wait with you-->
+<!--&lt;!&ndash;        [may be error prone...]&ndash;&gt;; Therefore dropped-->
+<!--    </strong>-->
+<!--    <br>-->
+<!--    Please bear with us for a few more seconds-->
+<!--    (even if there are a few players already, we will wait for a few more seconds, to see if we can get a larger group)-->
+<!--</p>-->
+
+<!--<button type="button" id="play_game">Play a game</button>-->
+
+<div style="display: flex" class="my-timer">
+    <h5>Time runs out in: <strong><span id="timer"></span></strong> min</h5>
+</div>
+
+
+
+<!--            <div style="pointer-events: none;width:100%;height:0;padding-bottom:66%;position:relative;" >-->
+<!--                 <iframe src="https://giphy.com/embed/tXL4FHPSnVJ0A" width="100%" height="100%"-->
+<!--                 style="position:absolute" frameBorder="0" class="giphy-embed" allowFullScreen></iframe>-->
+<!--            </div>-->
+
+{{ endif }}
+
+
+<input type="hidden" name="leave" value="0" id="id_leave"/>
+
+{{ endblock }}
+
+{{ block scripts }}
+<script>
+
+
+    // Decrease refresh rate when waiting was reached:
+    if (!js_vars.maxwait) {
+        console.log("Update page");
+        setInterval(function () {
+            window.location.reload();
+        }, 10000); // reload every 5 seconds; for 30 seconds: 30000
+        // Increase to 10? Less overlap and server load!
+        // TODO: To be checked in pilot!
+    }
+
+
+    // $("#id_next").click(function () {
+    //
+    //     console.log("Click!")
+    //     $("#id_leave").val(1);
+    //
+    //
+    // });
+
+
+    /// This JS code does not submit the page or anything. It is just a visual time for the participant
+    /// The real timer is in otree that is used to group people
+    ///
+    var timeoutHandle;
+
+    function countdown(stat) {
+        let seconds_waited = js_vars.timewaited;  // Set to server side time to stay synchronized.
+        // TODO: Was there a reason that Miriam had it implemented otherwise? (e.g., server load?)
+
+        if (stat) {
+            function tick() {
+
+                let counter = document.getElementById("timer");
+                let waitbonus = document.getElementById("waitbonus");
+                if (seconds_waited < js_vars.grouptimeout) {
+                    seconds_waited++;
+                }
+
+
+                // Determine time:
+                let time_left = js_vars.grouptimeout - seconds_waited;
+                // console.log(time_left)
+
+                // Convert time left:
+                let curmins = Math.floor(time_left / 60);
+                let cursecs = time_left % 60;
+
+
+                counter.innerHTML =
+                    curmins.toString() + ":" + (cursecs < 10 ? "0" : "") + String(cursecs);
+
+                let curbonus = Math.floor((seconds_waited) / js_vars.grouptimeout * js_vars.maxbonus * 100) / 100;
+                waitbonus.innerHTML = curbonus.toFixed(0);
+
+                // Re-execute the timer:
+                timeoutHandle = setTimeout(tick, 1000);
+
+            }
+
+            tick();
+        }
+    }
+
+    // document.addEventListener("visibilitychange", event => {
+    //     console.log("Visibility changed! " + document.hidden);
+    //     if(!document.hidden){
+    //         countdown(!js_vars.maxwait);
+    //     }
+    // })
+
+    window.onload = function startingTimer() {
+
+        countdown(!js_vars.maxwait);
+
+    }
+
+
+</script>
+
+<!--<script>-->
+<!--    // popup allowed-->
+<!--    let play_game = document.getElementById("play_game");-->
+
+<!--    play_game.onclick = () => {-->
+<!--        // window.open('https://javascript.info');-->
+<!--//         let params = `scrollbars=no,resizable=no,status=no,location=no,toolbar=no,menubar=no,-->
+<!--// width=600,height=300,left=100,top=100`;-->
+
+<!--        // open('/', 'test', params);-->
+<!--        let newWin = window.open("about:blank", "hello", "width=400,height=400,left=100,top=100");-->
+
+<!--        // console.log()-->
+<!--        // https://javascript.info/popup-windows-->
+
+<!--        // "_static/waitapp/snake.html"-->
+<!--    &lt;!&ndash;    <link href="style.css" rel="stylesheet" type="text/css" />&ndash;&gt;-->
+<!--    // script src="index.js" type="text/javascript" defer>script-->
+<!--// <link href="extern.html" rel="import" />-->
+
+<!--newWin.document.write(-->
+<!--  // '<script src=static/waitapp/snake.js" type="text/javascript"><\/script>'-->
+<!--);-->
+<!--//         newWin.document.write(-->
+<!--//   '<link href="static/waitapp/snake.html" rel="import" />'-->
+<!--// );-->
+<!--    };-->
+<!--</script>-->
+
+<!--<script>-->
+
+<!--    $(document).ready(function () {-->
+
+
+<!--        document.addEventListener("visibilitychange", event => {-->
+<!--            console.log("Visibility changed!");-->
+<!--        })-->
+
+
+<!--    });-->
+
+<!--</script>-->
+
+
+<!--<script>-->
+
+<!--$(document).ready(function () {-->
+
+<!--    var socket;-->
+
+<!--    initWebSocket();-->
+
+<!--    function initWebSocket() {-->
+<!--        socket = makeReconnectingWebSocket("/group_by_arrival_time?session_pk=11&page_index=5&app_name=waitapp&participant_id=104&player_id=4");-->
+<!--        socket.onmessage = function(e) {-->
+<!--            var data = JSON.parse(e.data);-->
+
+<!--            // Handle errors-->
+<!--            if (data.error) {-->
+<!--                // maybe the div's default text doesn't get shown-->
+<!--                $("#_otree-server-error").text(data.error);-->
+<!--                $("#_otree-server-error").show();-->
+<!--                return;-->
+<!--            }-->
+
+<!--            window.location.reload();-->
+
+<!--        };-->
+<!--    }-->
+
+
+<!--        var RELOAD_PARAM = "?reload=1";-->
+
+<!--        var SECOND = 1000;-->
+<!--        // the randomness is useful so that when there are many players,-->
+<!--        // the GBAT page loads get spaced apart. I think this helps wait pages-->
+<!--        // finish quicker, and may prevent some other bugs.-->
+<!--        window.setInterval(function () {-->
+<!--          window.location.href = window.location.pathname + RELOAD_PARAM;-->
+<!--        }, (10 + Math.random() * 60) * SECOND);-->
+
+<!--        function setTabHiddenStatus(isHidden) {-->
+<!--          socket.send(JSON.stringify({-->
+<!--            'tab_hidden': isHidden-->
+<!--          }));-->
+<!--          var titleText = document.getElementById('_otree-title').textContent;-->
+<!--          var newIcon = isHidden ? '🟡' : '🟢';-->
+<!--          document.querySelector('title').textContent = newIcon + ' ' + titleText;-->
+<!--        }-->
+
+<!--        document.addEventListener("visibilitychange", event => {-->
+
+<!--          //-->
+<!--          if (!document.hidden)-->
+<!--            setTabHiddenStatus(false);-->
+<!--        })-->
+
+<!--        // for first page load, we don't consider unfocused tabs to be abandoned.-->
+<!--        // that way, browser bots and manual testing etc still work.-->
+<!--        function sendTabHiddenStatusInitial() {-->
+<!--          //-->
+<!--          let gotDistracted = window.location.search.includes(RELOAD_PARAM) && document.hidden;-->
+<!--          setTabHiddenStatus(gotDistracted);-->
+<!--        }-->
+
+<!--        sendTabHiddenStatusInitial();-->
+
+
+<!-- });-->
+
+<!--</script>-->
+{{ endblock }}

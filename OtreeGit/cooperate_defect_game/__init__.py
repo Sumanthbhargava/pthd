@@ -12,7 +12,7 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 3
+    NUM_ROUNDS = 1
     L = 2
     CONDITION = 4
     PAYOFF_A = cu(300)

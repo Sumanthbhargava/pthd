@@ -1,0 +1,46 @@
+{{ block title }}
+You are finished
+{{ endblock }}
+
+{{ block content }}
+
+
+<p>You are finished with this survey – <strong>thank you!</strong></p>
+
+<p>Your <strong>completion code is</strong>:</p>
+
+<p style="text-align: center;font-size: larger">{{player.completion_code}}</p>
+
+<p>
+<!--    Please paste this code -->
+    Click on the link below to go
+    back to Prolific and claim your
+    total payment.
+</p>
+
+<p>
+    Click <a href="https://app.prolific.com/submissions/complete?cc=CTPA66HT">here</a>
+                to complete the study.
+</p>
+
+<p>If you have any questions or concerns regarding this study, please write us at
+    <a href="mailto: expkonstanz@gmail.com">expkonstanz@gmail.com</a>.
+</p>
+<p>
+    When you have finished copying and pasting the survey code, you may close this window.
+</p>
+
+
+{{ endblock }}
+
+
+{{ block styles }}
+
+<style>
+    #id_feedback {
+        height: 120px;
+    }
+</style>
+
+{{ endblock }}
+

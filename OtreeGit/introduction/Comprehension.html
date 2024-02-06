@@ -1,0 +1,108 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+Comprehension Test
+{% endblock %}
+{% block content %}
+<hr/>
+
+<br/>
+
+1. Assume your thermometer shows 100 in a round. This means:
+<br/>
+<input type="radio" id="1_a" name="1" value="1_a" required>
+<label for="1_a"> The room temperature is 100.</label><br>
+<input type="radio" id="1_b" name="1" value="1_b">
+<label for="1_b"> The room temperature may be 100 or not, as the thermometer may have some error.</label><br>
+<br/>
+2. What information of others choices you will see in each round?
+<br/>
+<input type="radio" id="2_a" name="2" value="2_a" required>
+<label for="2_a"> Their guess of the the room temperature in the past round.</label><br>
+<input type="radio" id="2_c" name="2" value="2_c">
+<label for="2_c"> A noisy information of their belief about the room temperature {% if confCheck %}and their confidence
+    on their belief {% endif %}in the past round.</label><br>
+<br/>
+3. The game will last for how many rounds?
+<br/>
+<input type="radio" id="3_a" name="3" value="3_a" required>
+<label for="3_a"> {{num_rounds}}</label><br>
+<input type="radio" id="3_b" name="3" value="3_b">
+<label for="3_b"> {{not_num_rounds}}</label><br>
+
+<br/>
+
+<span style="color:red" id="required">To proceed, please respond to each question. Your cooperation is appreciated.
+</span>
+
+<span style="color:red" id="err">At least one of your answers is incorrect. Please review your response. You may try only <span id="count" style="color:blue"> </span> remaining time.</span>
+
+<span id="msg" style="color:green">Congratulations! Your answers are correct. Please press the 'Next' button to start the game.</span>
+
+<button class="btn btn-primary" id="sub" name="sub" type="button">check</button>
+
+
+<span id="nextbtn">
+    {% next_button%}
+</span>
+
+<script>
+$("#nextbtn").hide()
+$("#msg").hide()
+$("#err").hide()
+$("#required").hide()
+count = 0
+$("#count").text(count)
+
+    $("#sub").on("click", function(){
+        choice1 = $('input[name="1"]:checked')
+        choice2 = $('input[name="2"]:checked')
+        choice3 = $('input[name="3"]:checked')
+
+       if(choice1 && choice2 && and  choice3) {
+            $("#required").hide()
+          if (choice1.val() == "1_b" && choice2.val() == "2_c" && choice3.val() == "3_a"){
+                    $("#msg").show()
+                    $("#sub").hide()
+                    liveSend(1)
+                    $("#err").hide()
+                    $("#n").show()
+                } else {
+                alert("hi")
+                $("#err").show()
+                alert(count)
+                    if (count == 5){
+                        $("#sub").hide()
+                        liveSend(0)
+                        $("#nextbtn").show()
+                    } else {
+                        count += 1
+                        $("#count").text(5 - count)
+                    }
+                }
+
+        } else {
+        $("#err").hide()
+            $("#required").show()
+        }
+
+    })
+
+
+
+
+</script>
+<style>
+    #msg{
+    color:green;
+    }
+    #count{
+    color:blue;
+    }
+
+
+
+</style>
+{% endblock %}
+

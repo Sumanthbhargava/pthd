@@ -1,0 +1,153 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block title %}
+Information sheet
+{% endblock %}
+
+{% block content %}
+
+<hr/>
+<p>
+    Thank you for your interest in our study. Please read through this information carefully before deciding whether or
+    not you wish to participate in the study. This experiment is part of a research project carried out at the
+    University of Konstanz. The aim of this research is to study human decision-making in groups, and the individual and
+    social factors affecting human cooperation and decision-making. The study will be performed as an online group game
+    and is expected to take twenty minutes to compete. In each round of the game you will be asked to make a decision
+    after giving some information about the game set-up and other participants' decisions. You will receive a payoff
+    based on your decision. After the group game, you will be asked to complete a questionnaire about your strategic
+    choices. Please note that answering the questions is optional. After completing the experiment and the questionnaire
+    you will be given a completion code and will be redirected to the Prolific website. After submission of the
+    completion code, which requires you to finish the experiment, you will receive a fixed compensation fee and a bonus
+    based on your performance in the game.
+
+    No known physical or mental harm may arise as a result of your participation in this experiment. Other than your
+    Prolific ID, no personal data will be collected. All the data collected in the experiment will be confidential,
+    meaning that the participant's data is collected on a separate server where only the experimenter has access to, and
+    will be fully anonymized before processing for scientific purposes. The result of the study will be used in
+    scientific publications and the anonymized data of the experiment may be stored in public repositories.
+</p>
+<br/>
+<hr/>
+
+<h4>Participants' consent form</h4>
+
+<br/>
+
+<b>Participants' right</b>
+<p>
+    Participation in this study is voluntary and you can freely choose whether to participate or not. While you can
+    freely withdraw from the experiment at any time without any prejudice, please note that you will be eligible for
+    compensation and bonus payment only if you complete the study and submit the completion code provided at the end of
+    the study. You will have the right to acquire more information about the study by contacting the experimenters, whom
+    you may contact via Prolific website or by using the following email address: expkonstanz@gmail.com.
+
+</p>
+<b>Confidentiality and data privacy</b>
+<p>
+    Other than you Prolific ID, no identifiable personal information will be collected in this experiment. We will use
+    your Prolific ID to process your compensation and bonus payment. Furthermore, we may use your Prolific ID to link
+    the data provided by you in this experiment to your general demographic and non-identifiable information (age,
+    gender, nationality, education level) provided through Prolific. Your Prolific ID will be removed from the data at
+    the earliest point in time and only the fully anonymized data will be subject to scientific analysis. Please note
+    that once the data is anonymized, we will not be able to remove your data from our data set. The result of the
+    analysis may appear in scientific publications and the fully anonymized data may be made available to researchers
+    other than the experimenter group and outside of the University of Konstanz.
+
+</p>
+<p>
+    Please read the statements below. By checking the box you will agree with these terms and may proceed to the
+    experiment.
+    <br/>
+    <ol>
+        <li>
+<p>
+    <b> Study participation: </b>
+    <br>
+<ol type="a">
+    <li>
+        I have read and understood the preceding information.
+    </li>
+    <li>
+        I confirm that I have been made fully aware of the risks associated with
+        this experiment and I am satisfied with the information provided.
+    </li>
+    <li>
+        I understand that I have the right to contact members of the research group in case of questions and concerns
+        even after my participation.
+    </li>
+    <li>
+        I understand that I have the right to withdraw from the experiment withought providing an explanation.
+    </li>
+    <li>
+        I agree to take part in this study.
+    </li>
+</ol>
+
+<br/>
+<label class="checkbox-label">
+    <input type="checkbox" class="checkbox" id="consent1" name="consent1">
+    By checking the box you agree with the statements above
+</label>
+
+</p>
+</li>
+<li>
+    <p>
+
+        <b>Data protection:</b>
+        <br>
+    <ol type="a">
+        <li>
+            I understand that my data will be soon anonymized and only the authorized researcher will have access to the
+            raw data.
+        </li>
+        <li>
+            I understand that the anonymized data of the experiment will be analyzed for scientific purposes and may
+            appear in scientific publication and be shared with other researcher.
+        </li>
+
+    </ol>
+    <label>
+        <input type="checkbox" class="checkbox" id="consent2" name="consent1">
+        By checking the box you agree with data protection statements above.
+    </label>
+
+    </p>
+
+</li>
+</ol>
+
+<!--<input type="text" id="mturkid"/>-->
+<br/>
+{% next_button %}
+<style>
+ .checkbox-label {
+            display: inline-block;
+            margin-right: 10px; /* Add spacing between checkboxes and text */
+        }
+
+ p {
+  text-align: justify
+ }
+
+
+</style>
+
+<script>
+$(".otree-btn-next").attr("disabled","disabled");
+
+$(".checkbox").change(function() {
+ let consent1 = $('#consent1').is(":checked")
+ let consent2 = $('#consent2').is(":checked")
+    if (consent1 && consent2){
+     $(".otree-btn-next").removeAttr("disabled")
+    } else {
+     $(".otree-btn-next").attr("disabled","disabled");
+    }
+});
+
+
+</script>
+{% endblock %}
+

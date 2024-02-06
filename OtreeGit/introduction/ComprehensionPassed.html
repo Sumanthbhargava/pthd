@@ -1,0 +1,80 @@
+{{ block title }}
+You are ready to be grouped!
+{{ endblock }}
+
+{{ block content }}
+
+<!--<strong>-->
+<!--    [Somehow pay for active time?]-->
+<!--</strong>-->
+
+<p>
+    You have now solved the comprehension check and <strong>completed the tutorial</strong>.
+</p>
+
+<p>
+    On the next page you will be assigned to a <strong>group of 5 with 4 other Prolific participants</strong>.
+    <!--    TODO: Flexible number?-->
+    You may need to wait for other participants to join.
+    Please be patient until a group of participants can be formed.
+</p>
+
+<div class="alert alert-secondary">
+
+
+    <p>
+        If you are successfully <strong>assigned to a group</strong>
+<!--        with other Prolific participants,-->
+        <strong>you will immediately start</strong> with the first stage of the first round of the task.
+        <!--        first see a <strong>short summary of the instructions</strong>,-->
+        <!--        including <strong>information about your sharing cost</strong>-->
+        <!--        before the actual game starts (this summary will automatically continue).-->
+        <br>
+        In the unlikely case that <strong>nobody else shows up within {{ wait_time_minutes }}&nbsp;minutes,
+        you can claim a completion code</strong>, can complete the study and will receive the flat fee of
+        {{ participation_fee }} and a bonus for waiting.
+    </p>
+
+</div>
+<p>
+    We <strong>will pay you for the time you wait</strong> for group assignment.
+    You will earn about {{ wait_bonus_10sec }} every 10&nbsp;seconds, up to a total of {{ wait_bonus_total }} that
+    will be added to your payments upon completion of this study.
+
+
+</p>
+
+
+<div class="alert alert-warning">
+
+    <strong>Please note</strong>:
+
+    <ul>
+        <li>
+            If only one person missed the start of the study, this would spoil the chances of
+            other participants to complete this study.
+            Therefore, please be fair and <strong>continue only if you can commit to this task for at least the next 15
+            minutes.</strong>
+        </li>
+
+        <!--        True? Seems not -->
+        <!--        <li>-->
+        <!--            In order to be grouped you are required to have the following grouping page as the <strong>active and-->
+        <!--            selected window</strong> on your computer so that you don't miss the start of the task-->
+        <!--            (selected by a mouse click within the window or by "tab-navigating" to it in your browser).-->
+        <!--        </li>-->
+
+        <li>
+            <strong>After you are grouped</strong>, you will be <strong>asked to click a button</strong>
+            to confirm that you are still there.
+            Please be aware that we cannot remunerate your study, if you miss this button.
+        </li>
+    </ul>
+
+
+</div>
+{{ next_button }}
+
+{{ endblock }}
+
+

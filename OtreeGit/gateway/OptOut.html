@@ -1,0 +1,31 @@
+{{ block title }}
+
+    We are sorry!
+
+
+{{ endblock }}
+
+
+{{ block content }}
+
+
+    <p><b>Would you like to inform us why you have decided to not participate in this study?</b></p>
+
+    <p> We would be grateful for a brief comment. This will help us to allay similar concerns and hence clarify our studies for future participants.</p>
+
+
+    <br>
+
+{{ formfield player.reason_optout label="Please leave us a comment" }}
+
+    <br>
+
+
+    <br>
+
+    <div>
+        <button name="next_button" value="True" id="id_next_button" class="btn btn-secondary btn-large">End study</button>
+    </div>
+
+
+{{ endblock }}

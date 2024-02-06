@@ -1,0 +1,37 @@
+{{ block title }}
+Information after completion
+{{ endblock }}
+
+{{ block content }}
+
+
+<p>
+    If you like, you can leave us a comment or concern about this study in the text field below. <br>
+</p>
+
+{{ formfield player.feedback label="" }}
+
+<p>
+    If you have any further questions or concerns regarding this study, please write us at
+    <a href="mailto: expkonstanz@gmail.com">expkonstanz@gmail.com</a>.<br>
+    Otherwise, <strong>click on the "Next" button to receive your completion code and end this study</strong>.
+</p>
+
+
+<div>
+    <button name="next_button" value="True" id="id_next_button" class="btn btn-secondary btn-large">Next</button>
+</div>
+
+
+{{ endblock }}
+
+
+{{ block styles }}
+
+<style>
+    #id_feedback {
+        height: 120px;
+    }
+</style>
+
+{{ endblock }}

@@ -1,0 +1,24 @@
+{% extends "global/Page.html" %}
+{% load otree %}
+
+{% block content %}
+
+<h3>Questionaire 2</h3>
+Please fill up following questionaires:
+<br>
+
+<hr/>
+The provided options display a range of 9 numbers, with the interpretation that <u><b>1 signifies Strong
+    Disagreement</b> and <b>9 signifies Strong Agreement</b></u>.<br/>
+<br/>
+
+{{formfields}}
+
+{% next_button%}
+
+<script>
+    $(".otree-btn-next").text("Finish")
+
+
+</script>
+{% endblock %}
