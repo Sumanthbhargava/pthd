@@ -15,7 +15,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
 
 
-    GROUPSIZE_S1 = 2  # minimum groupsize.
+    GROUPSIZE_S1 = 6  # minimum groupsize.
     NUM_ROUNDS = 25
     GROUPING_TIMEOUT = 1800 # 120  # should be eventually: 10 min? 8min? 600 (or 300?)
     MAXWAIT_PAY = 40 / 0.6  # maximum wait bonus.

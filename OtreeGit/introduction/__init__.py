@@ -44,9 +44,16 @@ class Consent(Page):
         return self.round_number == 1
 
 class Instruction(Page):
-    timeout_seconds = 60 * 15
     def is_displayed(self):
         return self.round_number == 1
+
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.is_bot == True:
+            player.isCheck = True
+            return 10  # Set a 10-second timeout for the bot
+        return 60 * 15 # Normal timeout for human players
+
 
     @staticmethod
     def vars_for_template(player: Player):

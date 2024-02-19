@@ -1,4 +1,7 @@
-{{ block title }}<h2 style="text-align: center;">Round {{ current_round }} Game {{ game_AB }}</h2>{{ endblock }}
+{{ block title }}
+<h2 style="text-align: center;">Round {{ current_round }}</h2>
+<h3 style="text-align: center;">Game {{ game_12 }}</h3>
+{{ endblock }}
 {{ block content }}
 <style>
     .game-records {
@@ -23,16 +26,21 @@
         In the last round:
     </p>
     <p>
-        You chose to {{ last_record.your_decision }} and your opponent chose to {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+        You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
     </p>
     <p>
-        Now you will play game {{ game_AB }}. Keep in mind that your opponent may have changed.
+        Now you will play game {{ game_12 }}.
     </p> 
-    <h4>Your opponent has {{ opponent_last_choice }} in the previous {% if game_AB == 'B' %} game. {% else %} game of the previous round. {% endif %}</h4>
+    {% if directinteraction == 0 %}
+    <p>
+        Keep in mind that your opponent may have changed.
+    </p>
+    {% endif %}
+    <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
 {% endif %}  
 {% if is_bot %}
     <h3>Processing...</h3>
-    <p>Please wait, making automatic decision...</p>
+    <p>Please wait, choosing strategy automatically...</p>
 {% else %}
     <h3>Your Choice</h3>
     <div class="form-group required">
@@ -42,17 +50,17 @@
                 <th colspan="2">The Other Participant</th>
             </tr>
             <tr>
-                <th>Cooperate</th>
-                <th>Defect</th>
+                <th>Strategy A</th>
+                <th>Strategy B </th>
             </tr>
             <tr>
                 <th rowspan="2"><span>You</span></th>
-                <td><button name="cooperate" value="True" class="btn btn-primary btn-large">I will cooperate</button></td>
+                <td><button name="cooperate" value="True" class="btn btn-primary btn-large">Strategy A</button></td>
                 <td>{{ payoffs.cooperate_cooperate }}, {{ payoffs.cooperate_cooperate }}</td>
                 <td>{{ payoffs.cooperate_defect }}, {{ payoffs.defect_cooperate }}</td>
             </tr>
             <tr>
-                <td><button name="cooperate" value="False" class="btn btn-primary btn-large">I will defect</button></td>
+                <td><button name="cooperate" value="False" class="btn btn-primary btn-large">Strategy B</button></td>
                 <td>{{ payoffs.defect_cooperate }}, {{ payoffs.cooperate_defect }}</td>
                 <td>{{ payoffs.defect_defect }}, {{ payoffs.defect_defect }}</td>
             </tr>
@@ -67,7 +75,7 @@
             <tr>
                 <th>Round</th>
                 <th>Game</th>
-                <th>Opponent's Decision in game A</th>
+                <th>Opponent's Strategy in game 1</th>
                 <th>Opponent's Payoff</th>
             </tr>
         </thead>
@@ -91,9 +99,9 @@
             <tr>
                 <th>Round</th>
                 <th>Game</th>
-                <th>Opponent's Decision in game A</th>
+                <th>Opponent's Strategy in game 1</th>
                 <th>Opponent's Payoff</th>
-                <th>Opponent's Opponent Decision in Game A</th>
+                <th>Opponent's Opponent Strategy in Game 1</th>
                 <th>Opponent's Opponent Payoff</th>
             </tr>
         </thead>
@@ -118,8 +126,8 @@
         <thead>
             <tr>
                 <th>Round</th>
-                <th>Opponent's Decision in Game A</th>
-                <th>Opponent's Decision in Game B</th>
+                <th>Opponent's Strategy in Game 1</th>
+                <th>Opponent's Strategy in Game 2</th>
             </tr>
         </thead>
         <tbody>
@@ -140,10 +148,10 @@
         <thead>
             <tr>
                 <th>Round</th>
-                <th>Opponent's Decision in Game A</th>
-                <th>Opponent's Opponent Decision in Game A</th>
-                <th>Opponent's Decision in Game B</th>
-                <th>Opponent's Opponent Decision in Game B</th>
+                <th>Opponent's Strategy in Game 1</th>
+                <th>Opponent's Opponent Strategy in Game 1</th>
+                <th>Opponent's Strategy in Game 2</th>
+                <th>Opponent's Opponent Strategy in Game 2</th>
             </tr>
         </thead>
         <tbody>
@@ -168,10 +176,10 @@
                 <th>Round</th>
                 <th>Game</th>
                 <th>Opponent ID</th>
-                <th>Opponent's Decision</th>
+                <th>Opponent's Strategy</th>
                 <th>Opponent's Payoff</th>
                 <th>Opponent's Opponent ID</th>
-                <th>Opponent's Opponent Decision</th>
+                <th>Opponent's Opponent Strategy</th>
                 <th>Opponent's Opponent Payoff</th>
             </tr>
         </thead>
@@ -192,5 +200,4 @@
     </table>
     {% endif %}
 {% endif %}
-    {{ include_sibling 'instructions.html' }}
 {{ endblock }}

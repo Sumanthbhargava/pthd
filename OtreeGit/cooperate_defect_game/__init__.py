@@ -12,20 +12,20 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 2
-    NUM_ROUNDS = 1
+    NUM_ROUNDS = 3
     L = 2
     CONDITION = 4
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
     PAYOFF_D = cu(0)
-    PAYOFF_MATRIX_A = {
+    PAYOFF_MATRIX_1 = {
         (False, True): cu(5),  
         (True, True): cu(3),
         (False, False): cu(1),
         (True, False): cu(0),
     }
-    PAYOFF_MATRIX_B = {
+    PAYOFF_MATRIX_2 = {
         (False, True): cu(5), 
         (True, True): cu(3),
         (False, False): cu(0),
@@ -34,7 +34,7 @@ class C(BaseConstants):
 
 class Subsession(BaseSubsession):
     #define a game variable(initalized as A) which toggles between Game A and Game B. Assuming it gets set to A at the beginning of a round, and in the 'GroupsShufflePage' the game is toggled to game 'B' as it concludes game A.
-    game=models.StringField(initial='A')
+    game=models.StringField(initial='1')
 
 
 class Group(BaseGroup):
@@ -73,8 +73,8 @@ class Player(BasePlayer):
             'game': self.subsession.game,
             'opponent_id': opponent.unique_id,
             'your_id': self.unique_id,
-            'opponent_decision': "Cooperate" if opponent.cooperate else "Defect",
-            'your_decision': "Cooperate" if self.cooperate else "Defect",
+            'opponent_decision': "A" if opponent.cooperate else "B",
+            'your_decision': "A" if self.cooperate else "B",
             'your_payoff': self_payoff,
             'opponent_payoff': opponent_payoff
         }
@@ -122,13 +122,13 @@ def other_player(player: Player):
 
 
 def set_payoff(player: Player):
-    game_AB = player.subsession.game
-    if game_AB == 'A':
-        payoff_matrix = C.PAYOFF_MATRIX_A
-    elif game_AB == 'B':
-        payoff_matrix = C.PAYOFF_MATRIX_B
+    game_12 = player.subsession.game
+    if game_12 == '1':
+        payoff_matrix = C.PAYOFF_MATRIX_1
+    elif game_12 == '2':
+        payoff_matrix = C.PAYOFF_MATRIX_2
     else:
-        raise ValueError(f"Invalid game type: {game_AB}")
+        raise ValueError(f"Invalid game type: {game_12}")
     opponent = other_player(player)
     player.game_pay = float(payoff_matrix[(player.cooperate, opponent.cooperate)])
 
@@ -140,13 +140,13 @@ def add_payoff(player: Player):
     player.payoff = player.payoff + cu(player.game_pay)
 
 def get_payoff_matrix(player: Player):
-    game_AB = player.subsession.game
-    if game_AB == 'A':
-        payoff_matrix = C.PAYOFF_MATRIX_A
-    elif game_AB == 'B':
-        payoff_matrix = C.PAYOFF_MATRIX_B
+    game_12 = player.subsession.game
+    if game_12 == '1':
+        payoff_matrix = C.PAYOFF_MATRIX_1
+    elif game_12 == '2':
+        payoff_matrix = C.PAYOFF_MATRIX_2
     else:
-        raise ValueError(f"Invalid game type: {game_AB}")
+        raise ValueError(f"Invalid game type: {game_12}")
 
     
     return {
@@ -184,8 +184,8 @@ def get_restructured_data(records):
     rounds = set(record['round'] for record in records)
 
     for round in rounds:
-        record_a = next((r for r in records if r['round'] == round and r['game'] == 'A'), None)
-        record_b = next((r for r in records if r['round'] == round and r['game'] == 'B'), None)
+        record_a = next((r for r in records if r['round'] == round and r['game'] == '1'), None)
+        record_b = next((r for r in records if r['round'] == round and r['game'] == '2'), None)
 
         restructured_record = {
             "round": round,
@@ -201,10 +201,10 @@ def get_restructured_data(records):
 
 def get_last_choice(records):
     last_choice = records[-1]['your_decision'] if records else None
-    if last_choice == 'Cooperate':
-        return 'Cooperated'
-    elif last_choice == 'Defect':
-        return 'Defected'
+    if last_choice == 'A':
+        return 'A'
+    elif last_choice == 'B':
+        return 'B'
     else:
         return None
 
@@ -215,9 +215,9 @@ class Decision(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.vars.get('is_bot', False):
+        if player.participant.is_bot == True:
             return 10  # Set a 10-second timeout for the bot
-        return None  # Normal timeout for human players
+        return None # Normal timeout for human players
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -230,19 +230,21 @@ class Decision(Page):
         last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
         filtered_records = get_filtered_records(player, opponent_records, current_round)
+        directinteraction = player.session.config['directinteraction']
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
             opponent_records = opponent_records,
             filtered_records = filtered_records,
             last_record = last_record,
-            game_AB = player.subsession.game,
+            game_12 = player.subsession.game,
             current_round = current_round,
             same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
             my_decision = player.field_maybe_none('cooperate'),
             opponent_decision = opponent.field_maybe_none('cooperate'),
             condition = player.session.config['past_records_display_condition_1_to_4'],
             opponent_last_choice = opponent_last_choice,
+            directinteraction = directinteraction,
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
@@ -253,7 +255,7 @@ class Decision(Page):
                 opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
                 if opponent_records != []:
                     latest_record= opponent_records[-1]
-                    if latest_record['your_decision'] == "Cooperate":
+                    if latest_record['your_decision'] == "A":
                         player.cooperate = True  # Cooperate if opponent has cooperated
                     else:
                         player.cooperate = False  # Defect if opponent has defected 
@@ -281,8 +283,24 @@ class Results(Page):
     
     @staticmethod
     def vars_for_template(player: Player,):
-        final_payoff = player.participant.payoff
-        final_amount = final_payoff.to_real_world_currency(player.session)
+        opponent = other_player(player)
+        self_records = get_player_details(player)
+        opponent_records = get_player_details(opponent)
+        opponent_last_choice = get_last_choice(opponent_records)
+        last_record = self_records[-1] if self_records != [] else None
+        current_round = player.round_number
+        return dict(
+            same_choice=player.cooperate == opponent.cooperate,
+            my_decision=player.field_display('cooperate'),
+            opponent_decision=opponent.field_display('cooperate'),
+            self_records=None,
+            current_round = current_round,
+            last_record= last_record,
+        )
+
+class round_result(Page):
+    @staticmethod
+    def vars_for_template(player: Player,):
         opponent = other_player(player)
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
         last_record = self_records[-1] if self_records != [] else None
@@ -298,18 +316,23 @@ class Results(Page):
             final_amount = final_amount,
         )
 
-
 class GroupsShufflePage(WaitPage):
     #Wait for all 6 players to be done with game A
-    wait_for_all_groups = True 
+    wait_for_all_groups = True
     
     @staticmethod
     def after_all_players_arrive(subsession: Subsession):
-        #Shuffle players into new random pairs before they enter game B
-        subsession.group_randomly()
 
-        if subsession.game == 'A':
-            subsession.game = 'B'
+        #Get direct interaction from config
+        directinteraction = subsession.session.config['directinteraction']
+        if directinteraction == 1:
+            pass
+        else:
+            #Shuffle players into new random pairs before they enter game B
+            subsession.group_randomly()
+
+        if subsession.game == '1':
+            subsession.game = '2'
         else:
             pass
 

@@ -50,6 +50,14 @@ class Player(BasePlayer):
     prolific_id = models.StringField(default=str(" "))
 
 
+def creating_session(subsession: Subsession):
+    for i in range(0,len(subsession.get_players())):
+        bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
+        if i < subsession.session.config['number_of_bots']: 
+            bot_player.participant.is_bot = True  # Mark this player as a bot
+        else:
+            bot_player.participant.is_bot = False  # Mark this player as a human
+
 
 def get_score(player):
     # List of selected images:
@@ -71,7 +79,12 @@ def get_score(player):
     print(player.captcha_score)
 
 class Consent(Page):
-    timeout_seconds = 60 * 2
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.is_bot == True:
+            return 10  # Set a 10-second timeout for the bot
+        return 60 * 2  # Normal timeout for human players
+
     def is_displayed(self):
         return self.round_number == 1
 
