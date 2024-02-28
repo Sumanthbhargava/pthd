@@ -7,212 +7,96 @@ Instructions
 
 {% block content %}
 <hr/>
-<div class="card m-3" id="1">
-    <div class="card-body" style="background-color: white;">
+
+<div class="card m-3 cardq" id="1">
+    <div class="card-body">
         <h3 style="text-align: center;">
             Thank you for participating in our experiment!
         </h3>
+        <br>
+        <h4 style="text-align: center;">
+            Instructions
+        </h4>
+        <p>Please read these instructions carefully as it can help you to gain more reward from the game.</p>
+        <p>You will play a game in a group of {{no_of_participants}} participants. The game is composed of {{no_of_rounds}} rounds. Each round has two stages. 
+            {% if directinteraction == 1 %} 
+                In each round, you will be paired with an opponent at random to play two games.
+            {% elif directinteraction == 0 %}
+                In each stage, you will be paired with an opponent at random to play a game.
+            {% endif %} 
+            The game have two strategies, A and B.</p>
+        <p>We will call the game that you play in stage 1 of each round, game 1. Below you can see the payoff of yourself and your opponent in the game 1. You will need to choose your strategy by clicking on one of the blue buttons, A and B.</p>
+        <table class='table table-bordered text-center' style='width: auto; margin: auto'>
+            <tr>
+                <th colspan=2 rowspan=2></th>
+                <th colspan=2>The Other Participant</th>
+            </tr>
+            <tr>
+                <th>Strategy A</th>
+                <th>Strategy B</th>
+            </tr>
+            <tr>
+                <th rowspan=2><span style="transform: rotate(-90deg);">You</span></th>
+                <td><button name="cooperate" value="True" class="btn btn-primary btn-large" disabled>Strategy A</button></td>
+                <td>3 points, 3 points</td>
+                <td>0 points, 5 points</td>
+            </tr>
+            <tr>
+                <td><button name="cooperate" value="False" class="btn btn-primary btn-large" disabled>Strategy B</button></td>
+                <td>5 points, 0 points</td>
+                <td>1 point, 1 point</td>
+            </tr>
+        </table>
     </div>
 </div>
-<div class="card m-3 cardq" id="2">
+
+<!-- Adding another card before the questions as requested -->
+<div class="card m-3" id="2">
     <div class="card-body">
-        <h3 style="text-align: center;">
-            In this experiment, you work in a group of participants to find the temperature of a room.
-        </h3>
-        <hr/>
-        <br/>
-        <br/>
-        <br/>
-        <img src="{% static '1.png' %}" alt="Your Image" width="100%" height="250" class="center">
-    </div>
-</div>
-<div class="card m-3 cardq" id="3">
-    <div class="card-body">
-        <h3 style="text-align: center;">
-            Your task is to estimate the temperature of a room
-        </h3>
-        <hr/>
-        <br/>
-        <br/>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="width: 78%;">
-                <ul>
-                    <li>
-                        The experiment lasts for {{round}} rounds.
-                    </li>
-                    <li>
-                        In each round, the temperature of the room may change. Otherwise, the temperature will be the same as in the previous round.
-                    </li>
-                    <li>
-                        Each member of the group has a thermometer.
-                    </li>
-                    <li>
-                        The thermometers may be noisy: their output may have some unknown error and varies across time.
-                    </li>
-                    <li>
-                        In each round, everybody receives a reading from his/her thermometer.
-                    </li>
-                </ul>
-            </span>
-            <span style="width: 18%;">
-                <img src="{% static '2.png' %}" alt="Your Image" width="130" height="200" class="center">
-            </span>
-        </div>
-
-    </div>
-</div>
-<div class="card m-3 cardq" id="4">
-    <div class="card-body">
-        <h3 style="text-align:center;">
-            Your task
-        </h3>
-        <hr/>
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-                    <span style="width: 60%;">
-                            <ul>
-                                <li>
-                                    You will also receive information about other participants’ estimate of the temperature, in the past round.
-                            </li>
-                                <li>
-                            Due to the internet connection noise, the information you receive from others is also noisy and may have some error.
-                            </li>
-                            <li>
-                            Similarly to you, other participants also receive noisy information about estimates of others.
-                                </li>
-                            </ul>
-                        </span>
-            <span style="width: 40%;">
-                <img src="{% static '3.png' %}" alt="Your Image" width="100%" height="220px">
-
-                <img src="{% static '4.png' %}" alt="Your Image" width="100%" height="220px">
-            </span>
-        </div>
-
-    </div>
-</div>
-<div class="card m-3 cardq" id="5">
-    <div class="card-body">
-        <h3 style="text-align:center;">
-            Your task
-        </h3>
-        <hr/>
-
-        <div style="display: flex; justify-content: space-between; align-items: center;">
-<span style="width=60%">
-<ul>
-    <li>
-   Your task is to put together all your information from
-        <ul>
-            <li>
-the noisy thermometer reading
-        </li>
-            <li>
-the communication with others in your group
-and estimate the temperature of the room.
-            </li>
-            </ul>
-</li>
-    <li>
-Other participants do the same.
-    </li>
-    </ul>
-    </span>
-            <span style="width=40%">
-                <img src="{% static '5.png' %}" alt="Your Image" width="100%" height="100%">
-
-             </span>
-
-        </div>
-    </div>
-</div>
-<div class="card m-3 cardq" id="6">
-    <div class="card-body">
-        <h3 style="text-align:center;">
-            Your task
-        </h3>
-        <hr/>
-        <br/>
-        <br/>
-        <ul>
-            <li>
-                In the first round, everyone only sees their own thermometer.
-            </li>
-            <li>
-                After the first round, everyone sees both his/her thermometer and others’ estimate in the previous
-                round.
-            </li>
-            <li>
-                In each round, after giving your estimate, you will also report how confident you are about your
-                estimate.
-            </li>
-            {% if confCheck%}
-            <li>
-                You will also see how confident others were on their belief when you see a noisy information of their
-                belief in the previous round.
-            </li>
+        <p>
+            After playing all player play <strong>game 1</strong>, you will go to the next stage, where you play <strong>game 2</strong>
+            {% if directinteraction == 1 %}
+                with the same opponent
+            {% elif directinteraction == 0 %}
+                . Please note that your opponent in this game will be chosen anew from the group.
             {% endif %}
-
-        </ul>
-
+        </p>
+        <p>The payoff matrix of game 2 is shown below</p>
+        <table class='table table-bordered text-center' style='width: auto; margin: auto'>
+            <tr>
+                <th colspan=2 rowspan=2></th>
+                <th colspan=2>The Other Participant</th>
+            </tr>
+            <tr>
+                <th>Strategy A</th>
+                <th>Strategy B</th>
+            </tr>
+            <tr>
+                <th rowspan=2><span style="transform: rotate(-90deg);">You</span></th>
+                <td><button name="cooperate" value="True" class="btn btn-primary btn-large" disabled>Strategy A</button></td>
+                <td>3 points, 3 points</td>
+                <td>1 points, 5 points</td>
+            </tr>
+            <tr>
+                <td><button name="cooperate" value="False" class="btn btn-primary btn-large" disabled>Strategy B</button></td>
+                <td>5 points, 1 points</td>
+                <td>0 point, 0 point</td>
+            </tr>
+        </table>
+        <p>Here again, you can choose your strategy by clicking on the strategy of your choice shown in blue. Please note the payoffs in this game are different: if you both play A, you both get 3 points. If you both play B, you both get 0 points. And if you play A and your opponent plays B, you will get 1 point and your opponent will get 5 points.</p>
+        <p>Below you can see a screenshot of this stage. On the top of this page you see a summary of your and your opponent’s strategy in the previous stage, and your payoff from stage 1. Then you can see your opponent’s strategy in his/her previous game. Below this page, you can see a table containing information about your opponent’s strategy in his/her past {{l}} rounds in games
+            {% if condition == 1 or condition == 2%}
+            1.
+            {% elif condition == 3 or condition == 4%}
+            1 and 2.
+            {% else %}
+            .
+            {% endif %}
+            </p>
     </div>
+    
 </div>
-<div class="card m-3 cardq" id="7">
-    <div class="card-body">
 
-        <h3 style="text-align:center;">Your earnings</h3>
-        <hr/>
-        <br/>
-        <br/>
-        <ul>
-            <li>
-                At the end of the experiment, you will receive a monetary payoff.
-            </li>
-            <li>
-                Your payment depends on your own performance, and how well you estimated the true temperature across all
-                rounds.
-            </li>
-            <li>
-                Your payoff will be shown in points. Each point worth 0.01 pounds. Please note your bonus will not exceed 2 pounds.
-            </li>
-        </ul>
-
-        <img src="{% static '6.png' %}" alt="Your Image" width="100%" height="300px" class="center">
-
-
-    </div>
-</div>
-<div class="card m-3 cardq" id="8">
-    <div class="card-body">
-        <h3 style="text-align:center;">Here is a summary of the instructions, if you want to review</h3>
-        <hr/>
-
-        In this experiment, you work in a group to find the temperature of a room. For this purpose you will have access
-        to two sources of information:
-        <ul>
-            <li>
-                You will see an estimate of the temperature by a thermometer. However, the thermometer has some error:
-                What the thermometer shows may deviate from the true temperature to some extent.
-            </li>
-            <li>
-                You will also receive information about the belief of other participants in the group {% if confCheck %}
-                and their confidence on their belief as well. However, this
-                {% endif %}information has some error, as well. That is, the number you see as the belief of a
-                participant, has some
-                deviation from his/her true belief.
-            </li>
-        </ul>
-        The experiment will last for {{round}} rounds. In the first round, you will only see
-        an estimate from the thermometer. In the subsequent rounds, you will also see information about other
-        participants’ estimate, in the previous round. After seeing this information, please insert your estimate of the
-        room temperature
-        and your confidence on your belief in the corresponding response fields. Then, please press the next button to
-        continue to the next page, where you will start the next round.
-        In the end of the experiment, you will receive a monetary payoff based on how accurate you had been able to
-        guess the room temperature, in the course of the experiment.
-
-    </div>
-
-</div>
 <span id="introBtns">
     <input type="button" id="next" value="Next" class="btn btn-primary"></input>
 
@@ -220,35 +104,43 @@ Other participants do the same.
 
 <span id="compre">
 
-    1. Assume your thermometer shows 100 in a round. This means:
+    1. You will be playing against how many opponents in a single game:
 <br/>
 <input type="radio" id="1_a" name="1" value="1_a" required>
-<label for="1_a"> The room temperature is 100.</label><br>
+<label for="1_a"> 2 </label><br>
 <input type="radio" id="1_b" name="1" value="1_b">
-<label for="1_b"> The room temperature may be 100 or not, as the thermometer may have some error.</label><br>
+<label for="1_b"> 7</label><br>
 <br/>
 2. What information of others choices you will see in each round?
 <br/>
 <input type="radio" id="2_a" name="2" value="2_a" required>
-<label for="2_a"> Their guess of the the room temperature in the past round.</label><br>
-<input type="radio" id="2_c" name="2" value="2_c">
-<label for="2_c"> A noisy information of their belief about the room temperature {% if confCheck %}and their confidence
-    on their belief {% endif %}in the past round.</label><br>
+<label for="2_a"> Predicitons of what your opponent might choose this round</label><br>
+<input type="radio" id="2_b" name="2" value="2_b">
+<label for="2_b"> Their decisions in the past rounds.</label><br>
 <br/>
 3. The game will last for how many rounds?
 <br/>
 <input type="radio" id="3_a" name="3" value="3_a" required>
-<label for="3_a"> {{round}}</label><br>
+<label for="3_a"> {{no_of_rounds}}</label><br>
 <input type="radio" id="3_b" name="3" value="3_b">
 <label for="3_b"> {{not_num_rounds}}</label><br>
+
+<br/>
+
+4. How many opponents are there in total, including yourself?
+<br/>
+<input type="radio" id="4_a" name="4" value="4_a" required>
+<label for="4_a"> {{no_of_participants}}</label><br>
+<input type="radio" id="4_b" name="4" value="4_b">
+<label for="4_b"> 11 </label><br>
 
 <br/>
 
 <span style="color:red" id="required">To proceed, please respond to each question. Your cooperation is appreciated.
 </span>
 
-<span style="color:red" id="err">At least one of your answers is incorrect. Please review your response. You may try only <span
-        id="count"> </span> remaining time.</span>
+<span style="color:red" id="err">At least one of your answers is incorrect. Please review your response. Remaining number of attempts: <br> <span id="count"> </span></span>
+
 
 <span id="msg" style="color:green">Congratulations! Your answers are correct. Please press the 'Next' button to start the game.</span>
 <br/>
@@ -264,6 +156,8 @@ Other participants do the same.
 </span>
 
 <script>
+var proceed = 0;
+var page = 1; // Initialize page variable
 proceed = 0
 $(document).ready(function() {
 $("#nextbtn").hide()
@@ -273,12 +167,6 @@ $(".otree-btn-next").text("Continue")
     $("#back").hide()
 
     $("#2").hide()
-    $("#3").hide()
-    $("#4").hide()
-    $("#5").hide()
-    $("#6").hide()
-    $("#7").hide()
-    $("#8").hide()
     $("#compre").hide()
     $("#back").click(function(){
         $("#compre").hide()
@@ -300,7 +188,7 @@ $(".otree-btn-next").text("Continue")
         page = page + 1
         $("#" + page).show()
         $("#back").show()
-        if (page == 9){
+        if (page == 3){
             if (proceed == 1){
                 $("#nextbtn").show()
             }
@@ -321,10 +209,11 @@ $("#count").text(count)
         choice1 = $('input[name="1"]:checked')
         choice2 = $('input[name="2"]:checked')
         choice3 = $('input[name="3"]:checked')
+        choice4 = $('input[name="4"]:checked')
 
-       if(choice1 && choice2 && choice3) {
+        if(choice1 && choice2 && choice3 && choice4) {
             $("#required").hide()
-            if (choice1.val() == "1_b" && choice2.val() == "2_c" && choice3.val() == "3_a"){
+            if (choice1.val() == "1_a" && choice2.val() == "2_b" && choice3.val() == "3_a" && choice4.val() == "4_a"){
                     proceed = 1
                     $("#msg").show()
                     $("#sub").hide()
@@ -333,7 +222,7 @@ $("#count").text(count)
                     $("#nextbtn").show()
                     var radioButtons = document.querySelectorAll('input[type="radio"]');
                         radioButtons.forEach(function(radioButton) {
-                          radioButton.disabled = true;
+                            radioButton.disabled = true;
                         }
                     );
             } else {
@@ -357,7 +246,7 @@ $("#count").text(count)
     })
 
 </script>
-
+    
 <style>
 .center {
   display: block;
@@ -375,10 +264,8 @@ height:530px
     #count{
     color:red;
     font-weight:bold;
-    font-size:20px;
+    font-size:100px;
     }
 
 </style>
-
 {% endblock %}
-

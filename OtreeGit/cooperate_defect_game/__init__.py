@@ -278,7 +278,7 @@ class Results(Page):
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
         if player.participant.vars.get('is_bot', False):
-            return 300  # Set a 10-second timeout for the bot
+            return 30  # Set a 10-second timeout for the bot
         return None  # Normal timeout for human players
     
     @staticmethod
@@ -289,22 +289,8 @@ class Results(Page):
         opponent_last_choice = get_last_choice(opponent_records)
         last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
-        return dict(
-            same_choice=player.cooperate == opponent.cooperate,
-            my_decision=player.field_display('cooperate'),
-            opponent_decision=opponent.field_display('cooperate'),
-            self_records=None,
-            current_round = current_round,
-            last_record= last_record,
-        )
-
-class round_result(Page):
-    @staticmethod
-    def vars_for_template(player: Player,):
-        opponent = other_player(player)
-        self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
-        last_record = self_records[-1] if self_records != [] else None
-        current_round = player.round_number
+        final_payoff = player.participant.payoff
+        final_amount = player.participant.payoff_plus_participation_fee()
         return dict(
             same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
@@ -314,6 +300,28 @@ class round_result(Page):
             last_record= last_record,
             final_payoff = final_payoff,
             final_amount = final_amount,
+        )
+
+class RoundResults(Page):
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.vars.get('is_bot', False):
+            return 20  # Set a 10-second timeout for the bot
+        return None  # Normal timeout for human players
+    
+    @staticmethod
+    def vars_for_template(player: Player,):
+        opponent = other_player(player)
+        self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
+        last_record = self_records[-1] if self_records != [] else None
+        current_round = player.round_number
+        return dict(
+            same_choice = player.cooperate == opponent.cooperate,
+            my_decision = player.field_display('cooperate'),
+            opponent_decision = opponent.field_display('cooperate'),
+            self_records = None,
+            current_round = current_round,
+            last_record = last_record,
         )
 
 class GroupsShufflePage(WaitPage):
@@ -336,4 +344,4 @@ class GroupsShufflePage(WaitPage):
         else:
             pass
 
-page_sequence = [Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, Results]
+page_sequence = [Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]

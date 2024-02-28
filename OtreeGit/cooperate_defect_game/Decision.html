@@ -20,24 +20,37 @@
         background-color: #f9f9f9;
     }
 </style>
-{% if last_record %}
-<h3>Results of game {{ last_record.game }} </h3>
-    <p>
-        In the last round:
-    </p>
-    <p>
-        You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
-    </p>
-    <p>
-        Now you will play game {{ game_12 }}.
-    </p> 
-    {% if directinteraction == 0 %}
-    <p>
-        Keep in mind that your opponent may have changed.
-    </p>
+{% if game_12 == '2' %}
+    {% if last_record %}
+    <h3>Results of game {{ last_record.game }} </h3>
+        <p>
+            In the last round:
+        </p>
+        <p>
+            You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+        </p>
+        <p>
+            Now you will play game {{ game_12 }}.
+        </p> 
+        {% if directinteraction == 0 %}
+        <p>
+            Keep in mind that your opponent may have changed.
+        </p>
+        {% endif %}
+        <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
+    {% endif %}  
+{% else  %}
+    {% if last_record %}
+    <h3>Results of game {{ last_record.game }} </h3>
+        <p>
+            Now you will play game {{ game_12 }}.
+        </p> 
+        <p>
+            Keep in mind that your opponent may have changed.
+        </p>
+        <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
     {% endif %}
-    <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
-{% endif %}  
+{% endif %} 
 {% if is_bot %}
     <h3>Processing...</h3>
     <p>Please wait, choosing strategy automatically...</p>
@@ -67,9 +80,11 @@
         </table>
     </div>
 {% endif %}
+{% if last_record %}
+<h3>Below you can see your opponent’s decisions in the past rounds.</h3>
+{% endif %}
 {% if condition == 1 %}
     {% if filtered_records %}
-    <h3>Current Opponent's Past Records:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>
@@ -93,7 +108,6 @@
     {% endif %}
 {% elif condition == 2 %}
     {% if filtered_records %}
-    <h3>Current Opponent's Past Records:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>
@@ -121,7 +135,6 @@
     {% endif %}
 {% elif condition == 3 %}
     {% if filtered_records %}
-    <h3>Current Opponent's Past Records:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>
@@ -143,7 +156,6 @@
     {% endif %}
 {% elif condition == 4 %}
     {% if filtered_records %}
-    <h3>Current Opponent's Past Records:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>
@@ -169,7 +181,6 @@
     {% endif %}
 {% else %}
     {% if filtered_records %}
-    <h3>Current Opponent's Past Records:</h3>
     <table class="game-records" border="1">
         <thead>
             <tr>

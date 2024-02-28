@@ -15,7 +15,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
 
 
-    GROUPSIZE_S1 = 6  # minimum groupsize.
+    GROUPSIZE_S1 = 4  # minimum groupsize.
     NUM_ROUNDS = 25
     GROUPING_TIMEOUT = 1800 # 120  # should be eventually: 10 min? 8min? 600 (or 300?)
     MAXWAIT_PAY = 40 / 0.6  # maximum wait bonus.
@@ -203,7 +203,12 @@ class WaitGroupingPage(WaitPage):
 
 # Prompt from Miriam:
 class GroupCheck(Page):
-    timeout_seconds = C.MAXTIME_PROMPT  # the countdown time for people to show that they are still attending
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.is_bot == True:
+            return 10  # Set a 10-second timeout for the bot
+        return 60 * 5 # Normal timeout for human players
+
 
     @staticmethod
     def is_displayed(player: Player):
@@ -218,7 +223,8 @@ class GroupCheck(Page):
             # If player fails to respond count as dropped out and dropped grouping (redundant?).
             # TODO: Possible redundancy; likely can be dropped; could however serve documentation purposes!
             # player.dropped_out = True
-            participant.drop_grouping = True
+            if participant.is_bot == False:
+                participant.drop_grouping = True
 
         # Get starting time:
         participant.wait_page_arrival_game = time.time()

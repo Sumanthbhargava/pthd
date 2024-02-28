@@ -403,7 +403,11 @@ class QuestionaireConsent(Page):
 
 class Questionaire3(Page):
     form_model = 'player'
-    timeout_seconds = 120
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        if player.participant.is_bot == True:
+            return 10  # Set a 10-second timeout for the bot
+        return 60 * 2 # Normal timeout for human players
 
     form_fields = ['q28', 'q29', 'q30', 'q31', 'q32']
 
@@ -445,14 +449,16 @@ class Payoff(Page):
         return player.round_number == Constants.num_rounds
     
     def vars_for_template(player):
-        PAYOFF_PKL_FILE = 'payoff_dict.pkl'
+        final_amount = player.participant.payoff_plus_participation_fee()
+        return dict(payoff = final_amount)
+        """PAYOFF_PKL_FILE = 'payoff_dict.pkl'
         with open(PAYOFF_PKL_FILE, 'rb') as file:
             payoff_dict = (pickle.load(file))
             payoff = payoff_dict[player.id_in_group]
             return dict(
             payoff=payoff
-        )
+        )"""
 
  # Questionaire1, Questionaire2,xx
 # QuestionaireConsent,Questionaire3,Questionaire1, Questionaire2
-page_sequence = [QuestionaireConsent,Questionaire3,Questionaire1, Questionaire2, Payoff]
+page_sequence = [QuestionaireConsent,Questionaire3, Payoff]

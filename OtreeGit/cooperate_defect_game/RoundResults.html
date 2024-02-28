@@ -1,0 +1,19 @@
+{{ block title }}Results of round {{ current_round }} game {{ last_record.game }}{{ endblock }}
+{{ block content }}
+{% if last_record %}
+    <p>
+        In the last round:
+    </p>
+    <p>
+        You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+    </p>
+    <p>
+        Please press the next button to play the next round.
+    </p>
+{% else %}
+    <p>
+        No records
+    </p>
+    {{ next_button }}
+{% endif %}
+{{ endblock }}

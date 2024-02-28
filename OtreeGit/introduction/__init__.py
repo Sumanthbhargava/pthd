@@ -23,7 +23,9 @@ class Constants(BaseConstants):
     name_in_url = 'Temperature'
     players_per_group = 2
     num_rounds = 25
+    num_of_rounds = 3
     not_num_rounds = 50
+    players_in_game = 6
 
 class Subsession(BaseSubsession):
     pass
@@ -57,7 +59,19 @@ class Instruction(Page):
 
     @staticmethod
     def vars_for_template(player: Player):
-        return dict(round=player.session.config["num_rounds"],not_num_rounds = Constants.not_num_rounds, confCheck=confCheck)
+        directinteraction = player.subsession.session.config['directinteraction']
+        l = player.subsession.session.config['no_of_past_rounds_to_be_displayed']
+        condition = player.subsession.session.config['past_records_display_condition_1_to_4']
+        return dict(
+            round=player.session.config["num_rounds"],
+            not_num_rounds = Constants.not_num_rounds, 
+            confCheck=confCheck, 
+            directinteraction = directinteraction, 
+            no_of_participants = Constants.players_in_game,
+            no_of_rounds = Constants.num_of_rounds,
+            l = l,
+            condition = condition,
+            )
 
     @staticmethod
     def live_method(player,data):
