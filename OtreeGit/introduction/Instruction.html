@@ -152,7 +152,7 @@ Instructions
 
 <input type="button" id="back" value="Back" class="btn btn-secondary"></input>
     <span id="nextbtn">
-    {% next_button%}
+    {% next_button %}
 </span>
 
 <script>
@@ -189,7 +189,7 @@ $(".otree-btn-next").text("Continue")
         $("#" + page).show()
         $("#back").show()
         if (page == 3){
-            if (proceed == 1){
+            if (proceed == 1 || attemptLimitReached){
                 $("#nextbtn").show()
             }
             $("#introBtns").hide()
@@ -204,6 +204,7 @@ $("#err").hide()
 $("#required").hide()
 
 count = 0
+var attemptLimitReached = false;
 $("#count").text(count)
     $("#sub").on("click", function(){
         choice1 = $('input[name="1"]:checked')
@@ -211,7 +212,7 @@ $("#count").text(count)
         choice3 = $('input[name="3"]:checked')
         choice4 = $('input[name="4"]:checked')
 
-        if(choice1 && choice2 && choice3 && choice4) {
+        if(choice1.length > 0 && choice2.length > 0 && choice3.length > 0 && choice4.length > 0) {
             $("#required").hide()
             if (choice1.val() == "1_a" && choice2.val() == "2_b" && choice3.val() == "3_a" && choice4.val() == "4_a"){
                     proceed = 1
@@ -231,6 +232,7 @@ $("#count").text(count)
                         $("#sub").hide()
                         $("#nextbtn").show()
                         liveSend(0)
+                        attemptLimitReached = true;
 
                     } else {
                         count += 1
@@ -240,7 +242,7 @@ $("#count").text(count)
 
         } else {
         $("#err").hide()
-            $("#required").show()
+        $("#required").show()
         }
 
     })

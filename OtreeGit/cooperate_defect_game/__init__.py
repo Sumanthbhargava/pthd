@@ -83,18 +83,16 @@ class Player(BasePlayer):
         # Save the updated list
         self.game_record = json.dumps(records)
 
+
 def creating_session(subsession: Subsession):
     for player in subsession.get_players():
         player.set_unique_id()
-    
-    # Randomly pairs 6 players into 3 pairs before game A
-    subsession.group_randomly()
 
-    for i in range(0,len(subsession.get_players())):
+    """ for i in range(0,len(subsession.get_players())):
         if i == subsession.session.config['number_of_bots']:
             break
         bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
-        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
+        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot"""
 
 # FUNCTIONS
 
@@ -119,6 +117,11 @@ def update_game_record(player: Player, self_payoff, opponent_payoff):
 
 def other_player(player: Player):
     return player.get_others_in_group()[0]
+
+def is_player_active(player: Player):
+    # Your logic here to check if the player is active
+    # For example, check if they've completed the previous app or are marked as active in some way
+    return True  # Placeholder, replace with actual check
 
 
 def set_payoff(player: Player):
@@ -249,6 +252,11 @@ class Decision(Page):
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
         # Check if the player is a bot
+        subsession = player.subsession
+        
+        # Iterating through all players in the subsession
+        for player in subsession.get_players():
+            print(f"Player ID: {player.id_in_group}, Participant ID: {player.participant.id_in_session}, Subsession: {player.subsession}")
         if player.participant.vars.get('is_bot', False) and timeout_happened:
             if player.unique_id == 1:
                 opponent= player.get_others_in_group()[0]
@@ -268,7 +276,6 @@ class Decision(Page):
 class ResultsWaitPage(WaitPage):
     after_all_players_arrive = set_payoffs_and_records_for_all_groups
     wait_for_all_groups = True
-
 
 class Results(Page):
     @staticmethod
@@ -344,4 +351,14 @@ class GroupsShufflePage(WaitPage):
         else:
             pass
 
-page_sequence = [Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
+
+class GameGroupsPage(WaitPage):
+    group_by_arrival_time = True
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number == 1
+
+        
+
+page_sequence = [GameGroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
