@@ -10,7 +10,7 @@ Your app description
 
 class Constants(BaseConstants):
     name_in_url = 'final'
-    players_per_group = 2
+    players_per_group = 6
     num_rounds = 25
     mintemp = 0
     maxtemp=  400

@@ -21,11 +21,11 @@ class MyBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Temperature'
-    players_per_group = 2
+    players_per_group = 6
     num_rounds = 25
     num_of_rounds = 3
     not_num_rounds = 50
-    players_in_game = 6
+    players_in_subgroup = 2
 
 class Subsession(BaseSubsession):
     pass
@@ -67,7 +67,7 @@ class Instruction(Page):
             not_num_rounds = Constants.not_num_rounds, 
             confCheck=confCheck, 
             directinteraction = directinteraction, 
-            no_of_participants = Constants.players_in_game,
+            no_of_participants = Constants.players_per_group,
             no_of_rounds = Constants.num_of_rounds,
             l = l,
             condition = condition,

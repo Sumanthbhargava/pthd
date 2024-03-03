@@ -11,10 +11,10 @@ payoffs.
 
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
-    PLAYERS_PER_GROUP = 2
+    PLAYERS_PER_GROUP = 6 # Can not have groups of 2, need fixeed group of six to shuffle pairs within 
     NUM_ROUNDS = 3
-    L = 2
-    CONDITION = 4
+    L = 2 # Depricated, to be removed
+    CONDITION = 4 # Depricated, to be removed
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
@@ -33,13 +33,20 @@ class C(BaseConstants):
     }
 
 class Subsession(BaseSubsession):
+    pass #Contains all players in the subessio, so methods should be moved to group
+
+class Group(BaseGroup):
     #define a game variable(initalized as A) which toggles between Game A and Game B. Assuming it gets set to A at the beginning of a round, and in the 'GroupsShufflePage' the game is toggled to game 'B' as it concludes game A.
     game=models.StringField(initial='1')
 
+    def assign_subgroups(self): # Otree has no sub-group functionality, since we can't put players into subgroups, we make a subgroup attribute.
+        players = self.get_players() # fetching the list players in the group
 
-class Group(BaseGroup):
-    pass
+        random.shuffle(players) # shuffling the order of the players in the list
 
+        for i, player in enumerate(players): #enumerate gives index i and the element at the index 'player'
+            #assigning each player to a subgroup based on their order in the randomized list
+            player.subgroup = (i//2) + 1  # first two players first pair, next two second pair, so on
 
 class Player(BasePlayer):
     cooperate = models.BooleanField(
@@ -47,8 +54,10 @@ class Player(BasePlayer):
         doc="""This player's decision""",
         widget = widgets.RadioSelect,
     )
-    unique_id = models.IntegerField()
+    unique_id = models.IntegerField() # Unique identifier of the player
     
+    subgroup = models.IntegerField() # subgroup field which identifies the modified subgroups
+
     game_pay = models.FloatField(initial=0.0)
     #variable for recording game events
     game_record = models.LongStringField()
@@ -70,33 +79,42 @@ class Player(BasePlayer):
         # Add the new record
         record = {
             'round': self.round_number,
-            'game': self.subsession.game,
+            'game': self.group.game,
             'opponent_id': opponent.unique_id,
             'your_id': self.unique_id,
             'opponent_decision': "A" if opponent.cooperate else "B",
             'your_decision': "A" if self.cooperate else "B",
             'your_payoff': self_payoff,
-            'opponent_payoff': opponent_payoff
+            'opponent_payoff': opponent_payoff,
+            'your_subgroup': self.subgroup,
+            'opponent_subgroup': opponent.subgroup,
         }
         records.append(record)
 
         # Save the updated list
         self.game_record = json.dumps(records)
+    
+    def get_other_in_subgroup(self): # ** Finding the other players for payoff calculations, and updating records **
+        players = self.get_other_in_group() # fetching all other players in group excluding current player
+        for player in players:
+            if player.field_maybe_none('subgroup') == self.field_maybe_none('subgroup'): #find the other player based on subgroup attribute
+                return player
+        return None
 
 
-def creating_session(subsession: Subsession):
+def creating_session(subsession: Subsession): # unique id and botassignment the only 2 things which should happen in while creating session
     for player in subsession.get_players():
         player.set_unique_id()
 
-    """ for i in range(0,len(subsession.get_players())):
+    for i in range(0,len(subsession.get_players())):
         if i == subsession.session.config['number_of_bots']:
             break
         bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
-        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot"""
+        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
 
 # FUNCTIONS
 
-def set_payoffs_and_records_for_all_groups(subsession: Subsession):
+def set_payoffs_and_records_for_all_groups(subsession: Subsession): #decprecated need to be removed as only one group will be there
     for group in subsession.get_groups():
         set_payoffs_and_records(group)
 
@@ -118,14 +136,8 @@ def update_game_record(player: Player, self_payoff, opponent_payoff):
 def other_player(player: Player):
     return player.get_others_in_group()[0]
 
-def is_player_active(player: Player):
-    # Your logic here to check if the player is active
-    # For example, check if they've completed the previous app or are marked as active in some way
-    return True  # Placeholder, replace with actual check
-
-
 def set_payoff(player: Player):
-    game_12 = player.subsession.game
+    game_12 = player.group.game
     if game_12 == '1':
         payoff_matrix = C.PAYOFF_MATRIX_1
     elif game_12 == '2':
@@ -143,7 +155,7 @@ def add_payoff(player: Player):
     player.payoff = player.payoff + cu(player.game_pay)
 
 def get_payoff_matrix(player: Player):
-    game_12 = player.subsession.game
+    game_12 = player.group.game
     if game_12 == '1':
         payoff_matrix = C.PAYOFF_MATRIX_1
     elif game_12 == '2':
@@ -234,30 +246,26 @@ class Decision(Page):
         current_round = player.round_number
         filtered_records = get_filtered_records(player, opponent_records, current_round)
         directinteraction = player.session.config['directinteraction']
+        condition = player.session.config['past_records_display_condition_1_to_4']
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
             opponent_records = opponent_records,
             filtered_records = filtered_records,
             last_record = last_record,
-            game_12 = player.subsession.game,
+            game_12 = player.group.game,
             current_round = current_round,
             same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
             my_decision = player.field_maybe_none('cooperate'),
             opponent_decision = opponent.field_maybe_none('cooperate'),
-            condition = player.session.config['past_records_display_condition_1_to_4'],
+            condition = condition,
             opponent_last_choice = opponent_last_choice,
             directinteraction = directinteraction,
+            subgroup = player.field_maybe_none('subgroup'),
         )
     @staticmethod
     def before_next_page(player: Player, timeout_happened): #Bot logic
-        # Check if the player is a bot
-        subsession = player.subsession
-        
-        # Iterating through all players in the subsession
-        for player in subsession.get_players():
-            print(f"Player ID: {player.id_in_group}, Participant ID: {player.participant.id_in_session}, Subsession: {player.subsession}")
-        if player.participant.vars.get('is_bot', False) and timeout_happened:
+        if player.participant.vars.get('is_bot', False) and timeout_happened: # if bot implement bot logic
             if player.unique_id == 1:
                 opponent= player.get_others_in_group()[0]
                 opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
@@ -274,8 +282,7 @@ class Decision(Page):
                 
 
 class ResultsWaitPage(WaitPage):
-    after_all_players_arrive = set_payoffs_and_records_for_all_groups
-    wait_for_all_groups = True
+    after_all_players_arrive = set_payoffs_and_records
 
 class Results(Page):
     @staticmethod
@@ -314,7 +321,7 @@ class RoundResults(Page):
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
         if player.participant.vars.get('is_bot', False):
             return 20  # Set a 10-second timeout for the bot
-        return None  # Normal timeout for human players
+        return 60  # Normal timeout for human players
     
     @staticmethod
     def vars_for_template(player: Player,):
@@ -332,24 +339,25 @@ class RoundResults(Page):
         )
 
 class GroupsShufflePage(WaitPage):
-    #Wait for all 6 players to be done with game A
-    wait_for_all_groups = True
     
     @staticmethod
-    def after_all_players_arrive(subsession: Subsession):
-
+    def after_all_players_arrive(group: Group):
         #Get direct interaction from config
-        directinteraction = subsession.session.config['directinteraction']
+        directinteraction = group.subsession.session.config['directinteraction']
+        if group.game == '1':
+            group.game = '2'
+        else:
+            pass
+
         if directinteraction == 1:
             pass
         else:
-            #Shuffle players into new random pairs before they enter game B
-            subsession.group_randomly()
-
-        if subsession.game == '1':
-            subsession.game = '2'
-        else:
-            pass
+            group.assign_subgroups()
+            print("Players shuffled and Subgroups formed successfully!!")
+            players = group.get_players()
+            print(f"ROUND: {group.round_number} \n GAME: {group.game}")
+            for player in players:
+                print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
 
 
 class GameGroupsPage(WaitPage):
@@ -358,7 +366,29 @@ class GameGroupsPage(WaitPage):
     @staticmethod
     def is_displayed(player: Player):
         return player.round_number == 1
+    
+    def after_all_players_arrive(group: Group):
+        group.assign_subgroups()
+        print("Players shuffled and Subgroups formed successfully!!")
+        players = group.get_players()
+        print(f"ROUND: {group.round_number} \n GAME: {group.game}")
+        for player in players:
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
 
+
+class GroupsPage(WaitPage):
+
+    @staticmethod
+    def is_displayed(player: Player):
+        return player.round_number != 1
+    
+    def after_all_players_arrive(group: Group):
+        group.assign_subgroups()
+        print("Players shuffled and Subgroups formed successfully!!")
+        players = group.get_players()
+        print(f"ROUND: {group.round_number} \n GAME: {group.game}")
+        for player in players:
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
         
 
-page_sequence = [GameGroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
+page_sequence = [GameGroupsPage, GroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]

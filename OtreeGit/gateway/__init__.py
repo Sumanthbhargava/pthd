@@ -22,7 +22,7 @@ class MyBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Gateway'
-    players_per_group = 2
+    players_per_group = 6
     num_rounds = 25
     not_num_rounds = 50
 

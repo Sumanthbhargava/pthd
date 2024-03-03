@@ -54,7 +54,7 @@ Instructions
 <div class="card m-3" id="2">
     <div class="card-body">
         <p>
-            After playing all player play <strong>game 1</strong>, you will go to the next stage, where you play <strong>game 2</strong>
+            After all players play <strong>game 1</strong>, you will go to the next stage, where you play <strong>game 2</strong>
             {% if directinteraction == 1 %}
                 with the same opponent
             {% elif directinteraction == 0 %}
@@ -107,7 +107,7 @@ Instructions
     1. You will be playing against how many opponents in a single game:
 <br/>
 <input type="radio" id="1_a" name="1" value="1_a" required>
-<label for="1_a"> 2 </label><br>
+<label for="1_a"> 1 </label><br>
 <input type="radio" id="1_b" name="1" value="1_b">
 <label for="1_b"> 7</label><br>
 <br/>
@@ -118,7 +118,7 @@ Instructions
 <input type="radio" id="2_b" name="2" value="2_b">
 <label for="2_b"> Their decisions in the past rounds.</label><br>
 <br/>
-3. The game will last for how many rounds?
+3. How many rounds will be there?
 <br/>
 <input type="radio" id="3_a" name="3" value="3_a" required>
 <label for="3_a"> {{no_of_rounds}}</label><br>
