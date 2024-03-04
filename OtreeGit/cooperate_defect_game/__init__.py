@@ -102,15 +102,33 @@ class Player(BasePlayer):
         return None
 
 
-def creating_session(subsession: Subsession): # unique id and botassignment the only 2 things which should happen in while creating session
-    for player in subsession.get_players():
-        player.set_unique_id()
+def creating_session(subsession: Subsession):
+    players = subsession.get_players()
+    num_players = len(players)
+    group_size = C.PLAYERS_PER_GROUP  # Default group size
+    num_bots_per_group = subsession.session.config.get('number_of_bots', 2)  # Default number of bots
 
-    for i in range(0,len(subsession.get_players())):
-        if i == subsession.session.config['number_of_bots']:
-            break
-        bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
-        bot_player.participant.vars['is_bot'] = True  # Mark this player as a bot
+    # Calculate total number of bots in the subsession based on the number of players
+    total_num_bots = (num_players // group_size) * num_bots_per_group
+
+    # Counter for bots assigned
+    bots_assigned = 0
+
+    for i in range(num_players):
+        # Assign unique_id to all players
+        players[i].set_unique_id()
+
+        # Check if the current index within each group segment should be a bot
+        if (i % group_size) < num_bots_per_group and bots_assigned < total_num_bots:
+            players[i].participant.vars['is_bot'] = True
+            bots_assigned += 1
+        else:
+            players[i].participant.vars['is_bot'] = False
+
+    # If you want to make sure that bots are evenly distributed and the last group might not be full
+    # but you still want it to contain the specified number of bots, you might need to adjust the logic above
+    # to keep track of how many players have been processed and ensure the bot assignment logic accounts for partial groups.
+
 
 # FUNCTIONS
 
@@ -222,6 +240,25 @@ def get_last_choice(records):
         return 'B'
     else:
         return None
+    
+def group_by_arrival_time_method(subsession, waiting_players):
+    # Number of bots to include in each group as specified in session config
+    num_bots = subsession.session.config.get('number_of_bots', 1)
+    # Ensure the number of bots does not exceed the limit for the group
+    num_bots = min(num_bots, C.PLAYERS_PER_GROUP - 1)
+
+    # Separate waiting players into bots and humans based on 'is_bot' attribute
+    bot_players = [p for p in waiting_players if p.participant.vars.get('is_bot', False)]
+    human_players = [p for p in waiting_players if not p.participant.vars.get('is_bot', False)]
+
+    # Check if there are enough humans and bots waiting to form a complete group
+    if len(human_players) >= C.PLAYERS_PER_GROUP - num_bots and len(bot_players) >= num_bots:
+        # Select the required number of bots and fill the rest of the group with humans
+        selected_bots = bot_players[:num_bots]
+        selected_humans = human_players[:(C.PLAYERS_PER_GROUP - num_bots)]
+        # Return the selected players to form a new group
+        return selected_bots + selected_humans
+
 
 # PAGES
 class Decision(Page):
@@ -373,7 +410,7 @@ class GameGroupsPage(WaitPage):
         players = group.get_players()
         print(f"ROUND: {group.round_number} \n GAME: {group.game}")
         for player in players:
-            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, BOT: {player.participant.vars.get('is_bot', False)}")
 
 
 class GroupsPage(WaitPage):
@@ -388,7 +425,7 @@ class GroupsPage(WaitPage):
         players = group.get_players()
         print(f"ROUND: {group.round_number} \n GAME: {group.game}")
         for player in players:
-            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup},  BOT: {player.participant.vars.get('is_bot', False)}")
         
 
 page_sequence = [GameGroupsPage, GroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
