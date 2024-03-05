@@ -3,7 +3,7 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['gateway','introduction','waitapp','cooperate_defect_game', 'survey','finish'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 4, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['gateway','introduction','waitapp','cooperate_defect_game', 'post_survey','finish'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 4, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
 ]
 

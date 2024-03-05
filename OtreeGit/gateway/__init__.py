@@ -79,15 +79,30 @@ def get_score(player):
     print(player.captcha_score)
 
 class Consent(Page):
+
+    @staticmethod
+    def is_displayed(self):
+        return self.round_number == 1 and self.participant.vars.get('is_bot') != True
+
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
         if player.participant.is_bot == True:
             return 10  # Set a 10-second timeout for the bot
         return 60 * 2  # Normal timeout for human players
 
-    def is_displayed(self):
-        return self.round_number == 1
+    @staticmethod
+    def before_next_page(self, timeout_happened):
+        self.prolific_id = self.participant.label
 
+class BotPage(Page):
+    @staticmethod
+    def is_displayed(self):
+        return self.round_number == 1 and self.participant.vars.get('is_bot', False)
+    
+    @staticmethod
+    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
+        return 10  # Normal timeout for human players
+    
     @staticmethod
     def before_next_page(self, timeout_happened):
         self.prolific_id = self.participant.label
@@ -167,4 +182,4 @@ class CaptchaOptOut(Page):
 # Consent, Instruction, Comprehension, ComprehensionFail
 
 # Consent,Captcha,CaptchaOptOut
-page_sequence = [Consent]
+page_sequence = [Consent, BotPage]

@@ -1,0 +1,15 @@
+{{ block title }}
+    Lottery choice {{task_nr}} of 5
+{{ endblock }}
+
+{{ block content }}
+<p>
+    Do you prefer:<br>
+    <br>
+    a) the lottery which gives you a 50 percent chance of receiving 30 Money Units or <br>
+    <br>
+    b) the sure payment of {{sure_payment}} Money Units.
+</p>
+ {{formfields}}
+    {{ next_button }}
+{{ endblock }}

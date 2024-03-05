@@ -1,0 +1,31 @@
+{{ block title }}
+    Post Experiment Distribution Task
+{{ endblock }}
+
+{{ block content }}
+{{if player.participant.group_end}}
+Due to the inactivity of multiple of your group members, the main game has finished for you. Now, we would like you to make some further decisions on a number of tasks.<br>
+{{ else }}
+You have finished the main game. Now, we would like you to make some further decisions on a number of tasks.<br>
+{{endif}}
+<br>
+
+
+<p>
+    First you will be asked to do a distribution task. In this task you have been randomly paired with another person from you group, whom we will refer to as the other.
+    You will be making a number of decisions about distributing resources between you and this other person.
+    For each of the following questions, please indicate the distribution you prefer most by marking the respective
+    position along the slider. You can only make one mark for each question.
+</p>
+<p>
+    Your decisions will yield money for both yourself and the other person.
+    One of your decisions will be chosen at random and paid out to you and the other participant.
+    Additionally, you will receive the Money Units from a decision made by a third participant,
+    who is independent of your decisions in this task.
+</p>
+
+<br>
+The distribution task will begin on the next page.
+<br>
+    {{ next_button }}
+{{ endblock }}

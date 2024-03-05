@@ -12,7 +12,7 @@ payoffs.
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
     PLAYERS_PER_GROUP = 6 # Can not have groups of 2, need fixeed group of six to shuffle pairs within 
-    NUM_ROUNDS = 3
+    NUM_ROUNDS = 2
     L = 2 # Depricated, to be removed
     CONDITION = 4 # Depricated, to be removed
     PAYOFF_A = cu(300)

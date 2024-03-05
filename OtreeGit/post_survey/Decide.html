@@ -1,0 +1,89 @@
+{{ block title }}
+Distribution task: decision {{ subsession.round_number }} of  15
+{{ endblock }}
+{{ block content }}
+
+<p>
+    Choose how to distribute the Money Units between yourself
+    and the other player:
+</p>
+
+<div class="input-group">
+    <input type="range" name="choice" min="0" max="8" class="form-range" oninput="sliderMoved(this)">
+</div>
+<br>
+<br>
+<p>State your desired distribution to proceed</p>
+<button class="nexttab btn-primary btn next" id = "next" disabled = "true" >Next</button>
+
+<script src="https://code.highcharts.com/highcharts.js"></script>
+<script src="https://code.highcharts.com/modules/series-label.js"></script>
+
+<div id="highchart"></div>
+
+<script>
+    function redrawChart(to_self, to_other) {
+        Highcharts.chart('highchart', {
+            chart: {
+                type: 'bar'
+            },
+            title: null,
+            xAxis: {
+                categories: ['You', 'Other participant'],
+                title: {
+                    text: null
+                }
+            },
+            yAxis: {
+                min: 0,
+                max: 20,
+                labels: {
+                    overflow: 'justify'
+                },
+                title: {
+                    text: "Money Units"
+                }
+            },
+            plotOptions: {
+                series: {
+                    animation: false
+                }
+
+            },
+            credits: {
+                enabled: false
+            },
+            series: [{
+                data: [to_self, to_other],
+                showInLegend: false,
+            }]
+        });
+    }
+
+
+    function sliderMoved(input) {
+        let idx = parseInt(input.value);
+
+        let row = js_vars.rows[idx];
+        let to_self = row.to_self/5;
+        let to_other = row.to_other/5;
+        redrawChart(to_self, to_other);
+        document.getElementById("next").disabled = false;
+    }
+
+    function init_chart(){
+        let idx = parseInt(4);
+        let row = js_vars.rows[idx];
+        let to_self = row.to_self/5;
+        let to_other = row.to_other/5;
+        redrawChart(to_self, to_other);
+    }
+
+window.onload=init_chart();
+</script>
+
+
+
+
+
+{{ endblock }}
