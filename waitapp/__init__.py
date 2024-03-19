@@ -15,7 +15,7 @@ class C(BaseConstants):
     PLAYERS_PER_GROUP = None
 
 
-    GROUPSIZE_S1 = 6  # minimum groupsize.
+    GROUPSIZE_S1 = 4  # minimum groupsize.
     NUM_ROUNDS = 25
     GROUPING_TIMEOUT = 1800 # 120  # should be eventually: 10 min? 8min? 600 (or 300?)
     MAXWAIT_PAY = 40 / 0.6  # maximum wait bonus.
@@ -77,7 +77,7 @@ def ranked_waiting_seconds(waiting_players):
     return waits
 
 
-def group_by_arrival_time_method(subsession, waiting_players):
+"""def group_by_arrival_time_method(subsession, waiting_players):
     # 1. Get all players who are on the waitpage and actually still wait:
     waiters = [wpl for wpl in waiting_players if not wpl.max_wait_reached]
     # 2. Get their ranked waiting times (index 0 is the largest)
@@ -100,9 +100,9 @@ def group_by_arrival_time_method(subsession, waiting_players):
         selected_bots = bot_players[:num_bots]
         selected_humans = human_players[:(C.GROUPSIZE_S1 - num_bots)]
         # Return the selected players to form a new group
-        return selected_bots + selected_humans
+        return selected_bots + selected_humans"""
 
-"""def group_by_arrival_time_method(subsession, waiting_players):
+def group_by_arrival_time_method(subsession, waiting_players):
     # 1. Get all players who are on the waitpage and actually still wait:
     waiters = [wpl for wpl in waiting_players if not wpl.max_wait_reached]
     # 2. Get their ranked waiting times (index 0 is the largest)
@@ -175,7 +175,7 @@ def group_by_arrival_time_method(subsession, waiting_players):
 
             # Set to finished:
             lwpart.finished = True
-"""
+
 
 # -------------------------------------------------------------------------------------------------------------------- #
 # PAGES -------------------------------------

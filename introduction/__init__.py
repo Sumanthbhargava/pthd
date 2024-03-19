@@ -21,7 +21,7 @@ class MyBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Temperature'
-    players_per_group = 6
+    players_per_group = 4
     num_rounds = 25
     num_of_rounds = 3
     not_num_rounds = 50
@@ -67,7 +67,7 @@ class Instruction(Page):
             not_num_rounds = Constants.not_num_rounds, 
             confCheck=confCheck, 
             directinteraction = directinteraction, 
-            no_of_participants = Constants.players_per_group,
+            no_of_participants = 6,
             no_of_rounds = Constants.num_of_rounds,
             l = l,
             condition = condition,

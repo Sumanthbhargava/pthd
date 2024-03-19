@@ -51,7 +51,7 @@ class PlayerBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Survey'
-    players_per_group = 2
+    players_per_group = None
     num_rounds = 25
     mintemp = 0
     maxtemp=  400
