@@ -76,32 +76,6 @@ def ranked_waiting_seconds(waiting_players):
     waits.sort(reverse=True)
     return waits
 
-
-"""def group_by_arrival_time_method(subsession, waiting_players):
-    # 1. Get all players who are on the waitpage and actually still wait:
-    waiters = [wpl for wpl in waiting_players if not wpl.max_wait_reached]
-    # 2. Get their ranked waiting times (index 0 is the largest)
-    wait_times = ranked_waiting_seconds(waiters)  # call ranked_waiting_seconds function
-    # 3. Get the number of waiting players:
-    nwaiters = len(wait_times)  # call this afterwards, since the ranking disregards those who are finsihed.
-
-    # Number of bots to include in each group as specified in session config
-    num_bots = subsession.session.config.get('number_of_bots', 1)
-    # Ensure the number of bots does not exceed the limit for the group
-    num_bots = min(num_bots, C.GROUPSIZE_S1 - 1)
-
-    # Separate waiting players into bots and humans based on 'is_bot' attribute
-    bot_players = [p for p in waiting_players if p.participant.vars.get('is_bot', False)]
-    human_players = [p for p in waiting_players if not p.participant.vars.get('is_bot', False)]
-
-    # Check if there are enough humans and bots waiting to form a complete group
-    if len(human_players) >= C.GROUPSIZE_S1 - num_bots and len(bot_players) >= num_bots:
-        # Select the required number of bots and fill the rest of the group with humans
-        selected_bots = bot_players[:num_bots]
-        selected_humans = human_players[:(C.GROUPSIZE_S1 - num_bots)]
-        # Return the selected players to form a new group
-        return selected_bots + selected_humans"""
-
 def group_by_arrival_time_method(subsession, waiting_players):
     # 1. Get all players who are on the waitpage and actually still wait:
     waiters = [wpl for wpl in waiting_players if not wpl.max_wait_reached]
@@ -230,8 +204,6 @@ class WaitGroupingPage(WaitPage):
 class GroupCheck(Page):
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.is_bot == True:
-            return 10  # Set a 10-second timeout for the bot
         return 60 * 5 # Normal timeout for human players
 
 
@@ -248,8 +220,7 @@ class GroupCheck(Page):
             # If player fails to respond count as dropped out and dropped grouping (redundant?).
             # TODO: Possible redundancy; likely can be dropped; could however serve documentation purposes!
             # player.dropped_out = True
-            if participant.is_bot == False:
-                participant.drop_grouping = True
+            participant.drop_grouping = True
 
         # Get starting time:
         participant.wait_page_arrival_game = time.time()

@@ -53,10 +53,6 @@ class Player(BasePlayer):
 def creating_session(subsession: Subsession):
     for i in range(0,len(subsession.get_players())):
         bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
-        if i < subsession.session.config['number_of_bots']: 
-            bot_player.participant.is_bot = True  # Mark this player as a bot
-        else:
-            bot_player.participant.is_bot = False  # Mark this player as a human
 
 
 def get_score(player):
@@ -82,27 +78,12 @@ class Consent(Page):
 
     @staticmethod
     def is_displayed(self):
-        return self.round_number == 1 and self.participant.vars.get('is_bot') != True
+        return self.round_number == 1
 
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.is_bot == True:
-            return 10  # Set a 10-second timeout for the bot
         return 60 * 2  # Normal timeout for human players
 
-    @staticmethod
-    def before_next_page(self, timeout_happened):
-        self.prolific_id = self.participant.label
-
-class BotPage(Page):
-    @staticmethod
-    def is_displayed(self):
-        return self.round_number == 1 and self.participant.vars.get('is_bot', False)
-    
-    @staticmethod
-    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        return 10  # Normal timeout for human players
-    
     @staticmethod
     def before_next_page(self, timeout_happened):
         self.prolific_id = self.participant.label
@@ -182,4 +163,4 @@ class CaptchaOptOut(Page):
 # Consent, Instruction, Comprehension, ComprehensionFail
 
 # Consent,Captcha,CaptchaOptOut
-page_sequence = [Consent, BotPage]
+page_sequence = [Consent]

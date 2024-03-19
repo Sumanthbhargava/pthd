@@ -51,35 +51,30 @@
         <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
     {% endif %}
 {% endif %} 
-{% if is_bot %}
-    <h3>Processing...</h3>
-    <p>Please wait, choosing strategy automatically...</p>
-{% else %}
-    <h3>Your Choice</h3>
-    <div class="form-group required">
-        <table class="table table-bordered text-center" style="width: auto; margin: auto">
-            <tr>
-                <th colspan="2" rowspan="2"></th>
-                <th colspan="2">The Other Participant</th>
-            </tr>
-            <tr>
-                <th>Strategy A</th>
-                <th>Strategy B </th>
-            </tr>
-            <tr>
-                <th rowspan="2"><span>You</span></th>
-                <td><button name="cooperate" value="True" class="btn btn-primary btn-large">Strategy A</button></td>
-                <td>{{ payoffs.cooperate_cooperate }}, {{ payoffs.cooperate_cooperate }}</td>
-                <td>{{ payoffs.cooperate_defect }}, {{ payoffs.defect_cooperate }}</td>
-            </tr>
-            <tr>
-                <td><button name="cooperate" value="False" class="btn btn-primary btn-large">Strategy B</button></td>
-                <td>{{ payoffs.defect_cooperate }}, {{ payoffs.cooperate_defect }}</td>
-                <td>{{ payoffs.defect_defect }}, {{ payoffs.defect_defect }}</td>
-            </tr>
-        </table>
-    </div>
-{% endif %}
+<h3>Your Choice</h3>
+<div class="form-group required">
+    <table class="table table-bordered text-center" style="width: auto; margin: auto">
+        <tr>
+            <th colspan="2" rowspan="2"></th>
+            <th colspan="2">The Other Participant</th>
+        </tr>
+        <tr>
+            <th>Strategy A</th>
+            <th>Strategy B </th>
+        </tr>
+        <tr>
+            <th rowspan="2"><span>You</span></th>
+            <td><button name="cooperate" value="True" class="btn btn-primary btn-large">Strategy A</button></td>
+            <td>{{ payoffs.cooperate_cooperate }}, {{ payoffs.cooperate_cooperate }}</td>
+            <td>{{ payoffs.cooperate_defect }}, {{ payoffs.defect_cooperate }}</td>
+        </tr>
+        <tr>
+            <td><button name="cooperate" value="False" class="btn btn-primary btn-large">Strategy B</button></td>
+            <td>{{ payoffs.defect_cooperate }}, {{ payoffs.cooperate_defect }}</td>
+            <td>{{ payoffs.defect_defect }}, {{ payoffs.defect_defect }}</td>
+        </tr>
+    </table>
+</div>
 {% if last_record %}
 <h3>Below you can see your opponent’s decisions in the past rounds.</h3>
 {% endif %}

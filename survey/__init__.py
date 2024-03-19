@@ -404,9 +404,7 @@ class QuestionaireConsent(Page):
 class Questionaire3(Page):
     form_model = 'player'
     @staticmethod
-    def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.is_bot == True:
-            return 10  # Set a 10-second timeout for the bot
+    def get_timeout_seconds(player: Player): 
         return 60 * 2 # Normal timeout for human players
 
     form_fields = ['q28', 'q29', 'q30', 'q31', 'q32']

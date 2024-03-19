@@ -11,12 +11,10 @@ payoffs.
 
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
-    PLAYERS_PER_GROUP = 4 # for 1 bot
+    PLAYERS_PER_GROUP = 4 # for 2 bots
     BOT_LOGIC = 'cdu'
     intended_players_per_group = 6
     NUM_ROUNDS = 3
-    L = 2 # Depricated, to be removed
-    CONDITION = 4 # Depricated, to be removed
     PAYOFF_A = cu(300)
     PAYOFF_B = cu(200)
     PAYOFF_C = cu(100)
@@ -60,7 +58,6 @@ class Group(BaseGroup):
         if not self.field_maybe_none('temp_bot_records'):
             self.temp_bot_records = json.dumps(self.get_last_bot_details()) if self.game =='1' else self.field_maybe_none('bot_records')
         all_bot_records = json.loads(self.field_maybe_none('temp_bot_records')) if self.field_maybe_none('temp_bot_records') else []
-        print(all_bot_records)
         # Temporary list to store selected bot records
         selected_records = []
 
@@ -70,7 +67,6 @@ class Group(BaseGroup):
 
             # Select the records based on the calculated indices
             selected_records = [all_bot_records[i] for i in indices_to_select]
-            print(selected_records)
             # Remove the selected records from all_bot_records
             # It's safer to remove items in reverse order to not mess up the indices
             for index in sorted(indices_to_select, reverse=True):
@@ -78,7 +74,6 @@ class Group(BaseGroup):
         
         # Update temp_bot_records with what's left after removing selected records
         self.temp_bot_records = json.dumps(all_bot_records)
-        print('n=',self.n)
         self.n -= 1
         return selected_records
 
@@ -206,7 +201,6 @@ def creating_session(subsession: Subsession):
     for player in subsession.get_players():
         # Assign unique_id to all players
         player.set_unique_id()
-        player.participant.vars['is_bot'] = False
    
 
 # FUNCTIONS
@@ -321,7 +315,7 @@ def get_filtered_records(player: Player, records, current_round):
     l_rounds = player.session.config['no_of_past_rounds_to_be_displayed']
     l= l_rounds if l_rounds < current_round else current_round
     if condition == 1 or condition == 2:
-        filtered_records = [record for record in records if record['game'] == 'A']
+        filtered_records = [record for record in records if record['game'] == '1']
         return filtered_records[-l:]
     elif condition == 3 or condition == 4:
         filtered_records = get_restructured_data(records)
@@ -368,13 +362,10 @@ class Decision(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.is_bot == True:
-            return 10  # Set a 10-second timeout for the bot
         return None # Normal timeout for human players
 
     @staticmethod
     def vars_for_template(player: Player):
-        is_bot = player.participant.vars.get('is_bot', False) # Sent to HTML to display a different decision page for bot
         payoffs = get_payoff_matrix(player)
         current_round = player.round_number
         if player.against_bot == False:
@@ -393,7 +384,6 @@ class Decision(Page):
         condition = player.session.config['past_records_display_condition_1_to_4']
 
         return dict(
-            is_bot=is_bot,
             payoffs=payoffs,
             opponent_records = opponent_records,
             filtered_records = filtered_records,
@@ -408,22 +398,6 @@ class Decision(Page):
             directinteraction = directinteraction,
             subgroup = player.field_maybe_none('subgroup'),
         )
-    @staticmethod
-    def before_next_page(player: Player, timeout_happened): #Bot logic
-        if player.participant.vars.get('is_bot', False) and timeout_happened: # if bot implement bot logic
-            if player.unique_id == 1:
-                opponent= player.get_other_in_subgroup()
-                opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
-                if opponent_records != []:
-                    latest_record= opponent_records[-1]
-                    if latest_record['your_decision'] == "A":
-                        player.cooperate = True  # Cooperate if opponent has cooperated
-                    else:
-                        player.cooperate = False  # Defect if opponent has defected 
-                else: 
-                    player.cooperate = True  # Cooperate in game A
-            else:
-                player.cooperate = random.choice([True, False]) 
                 
 
 class ResultsWaitPage(WaitPage):
@@ -436,8 +410,6 @@ class Results(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.vars.get('is_bot', False):
-            return 30  # Set a 10-second timeout for the bot
         return None  # Normal timeout for human players
     
     @staticmethod
@@ -473,8 +445,6 @@ class Results(Page):
 class RoundResults(Page):
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        if player.participant.vars.get('is_bot', False):
-            return 20  # Set a 10-second timeout for the bot
         return 60  # Normal timeout for human players
     
     @staticmethod
