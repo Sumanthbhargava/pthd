@@ -11,8 +11,10 @@ payoffs.
 
 class C(BaseConstants):
     NAME_IN_URL = 'coop_defect_game'
-    PLAYERS_PER_GROUP = 6 # Can not have groups of 2, need fixeed group of six to shuffle pairs within 
-    NUM_ROUNDS = 2
+    PLAYERS_PER_GROUP = 4 # for 1 bot
+    BOT_LOGIC = 'cdu'
+    intended_players_per_group = 6
+    NUM_ROUNDS = 3
     L = 2 # Depricated, to be removed
     CONDITION = 4 # Depricated, to be removed
     PAYOFF_A = cu(300)
@@ -38,15 +40,99 @@ class Subsession(BaseSubsession):
 class Group(BaseGroup):
     #define a game variable(initalized as A) which toggles between Game A and Game B. Assuming it gets set to A at the beginning of a round, and in the 'GroupsShufflePage' the game is toggled to game 'B' as it concludes game A.
     game=models.StringField(initial='1')
+    bot_records = models.LongStringField()
+    temp_bot_records = models.LongStringField()
+    n = models.IntegerField(initial = 0)
 
-    def assign_subgroups(self): # Otree has no sub-group functionality, since we can't put players into subgroups, we make a subgroup attribute.
-        players = self.get_players() # fetching the list players in the group
+    def get_last_bot_details(self):
+        group_last_round = self.in_round(self.round_number - 1)
+        return json.loads(group_last_round.field_maybe_none('bot_records'))
 
-        random.shuffle(players) # shuffling the order of the players in the list
+    def update_n(self):
+        if self.n == 0:
+            self.n = C.intended_players_per_group - C.PLAYERS_PER_GROUP
 
-        for i, player in enumerate(players): #enumerate gives index i and the element at the index 'player'
-            #assigning each player to a subgroup based on their order in the randomized list
-            player.subgroup = (i//2) + 1  # first two players first pair, next two second pair, so on
+    def get_filtered_bot_records(self):
+        # Ensure n is updated correctly
+        self.update_n()
+        
+        # Load all bot records into the temporary list if temp_bot_records is empty
+        if not self.field_maybe_none('temp_bot_records'):
+            self.temp_bot_records = json.dumps(self.get_last_bot_details()) if self.game =='1' else self.field_maybe_none('bot_records')
+        all_bot_records = json.loads(self.field_maybe_none('temp_bot_records')) if self.field_maybe_none('temp_bot_records') else []
+        print(all_bot_records)
+        # Temporary list to store selected bot records
+        selected_records = []
+
+        if self.n > 0:
+            # Calculate the indices of the records to be selected and removed
+            indices_to_select = range(0, len(all_bot_records), self.n)
+
+            # Select the records based on the calculated indices
+            selected_records = [all_bot_records[i] for i in indices_to_select]
+            print(selected_records)
+            # Remove the selected records from all_bot_records
+            # It's safer to remove items in reverse order to not mess up the indices
+            for index in sorted(indices_to_select, reverse=True):
+                all_bot_records.pop(index)
+        
+        # Update temp_bot_records with what's left after removing selected records
+        self.temp_bot_records = json.dumps(all_bot_records)
+        print('n=',self.n)
+        self.n -= 1
+        return selected_records
+
+
+    def add_bot_record(self, opponent, self_payoff, opponent_payoff, bot_cooperate):
+        if not self.field_maybe_none('bot_records'):
+            if self.round_number>1:
+                records = self.get_last_bot_details()
+            else:
+                records = []
+        else:
+            records = json.loads(self.field_maybe_none('bot_records'))
+        # Add the new record
+        record = {
+            'round': self.round_number,
+            'game': self.game,
+            'opponent_id': opponent.unique_id,
+            'your_id': -1,
+            'opponent_decision': "A" if opponent.cooperate else "B",
+            'your_decision': "A" if bot_cooperate else "B",
+            'your_payoff': self_payoff,
+            'opponent_payoff': opponent_payoff,
+            'your_subgroup': -1,
+            'opponent_subgroup': opponent.subgroup,
+        }
+        records.append(record)
+
+        # Save the updated list
+        self.bot_records = json.dumps(records)
+
+
+    def assign_against_bot(self):
+        all_players = self.get_players()
+        num_bots = C.intended_players_per_group - C.PLAYERS_PER_GROUP
+        players_to_assign_bot = random.sample(all_players, num_bots)
+        for player in all_players:
+            player.against_bot = player in players_to_assign_bot
+
+    def assign_subgroups(self):
+        all_players = self.get_players()
+
+        # First, set the subgroup for players against bots to -1
+        for player in all_players:
+            if player.against_bot:
+                player.subgroup = -1
+
+        # Next, filter out players who are marked to play against bots and pair the rest
+        players_not_against_bot = [p for p in all_players if not p.against_bot]
+
+        random.shuffle(players_not_against_bot)
+
+        # Assign subgroups for players not against bots
+        for i, player in enumerate(players_not_against_bot):
+            player.subgroup = (i // 2) + 1
 
 class Player(BasePlayer):
     cooperate = models.BooleanField(
@@ -55,7 +141,7 @@ class Player(BasePlayer):
         widget = widgets.RadioSelect,
     )
     unique_id = models.IntegerField() # Unique identifier of the player
-    
+    against_bot = models.BooleanField(initial=False)
     subgroup = models.IntegerField() # subgroup field which identifies the modified subgroups
 
     game_pay = models.FloatField(initial=0.0)
@@ -75,27 +161,41 @@ class Player(BasePlayer):
                 records = []
         else:
             records = json.loads(self.field_maybe_none('game_record'))
-        
+        if self.against_bot == False:
         # Add the new record
-        record = {
-            'round': self.round_number,
-            'game': self.group.game,
-            'opponent_id': opponent.unique_id,
-            'your_id': self.unique_id,
-            'opponent_decision': "A" if opponent.cooperate else "B",
-            'your_decision': "A" if self.cooperate else "B",
-            'your_payoff': self_payoff,
-            'opponent_payoff': opponent_payoff,
-            'your_subgroup': self.subgroup,
-            'opponent_subgroup': opponent.subgroup,
-        }
+            record = {
+                'round': self.round_number,
+                'game': self.group.game,
+                'opponent_id': opponent.unique_id,
+                'your_id': self.unique_id,
+                'opponent_decision': "A" if opponent.cooperate else "B",
+                'your_decision': "A" if self.cooperate else "B",
+                'your_payoff': self_payoff,
+                'opponent_payoff': opponent_payoff,
+                'your_subgroup': self.subgroup,
+                'opponent_subgroup': opponent.subgroup,
+            }
+
+        else:
+            record = {
+                'round': self.round_number,
+                'game': self.group.game,
+                'opponent_id': opponent['unique_id'],
+                'your_id': self.unique_id,
+                'opponent_decision': "A" if opponent['cooperate'] else "B",
+                'your_decision': "A" if self.cooperate else "B",
+                'your_payoff': self_payoff,
+                'opponent_payoff': opponent_payoff,
+                'your_subgroup': self.subgroup,
+                'opponent_subgroup': opponent['subgroup'],
+            }
         records.append(record)
 
         # Save the updated list
         self.game_record = json.dumps(records)
     
     def get_other_in_subgroup(self): # ** Finding the other players for payoff calculations, and updating records **
-        players = self.get_other_in_group() # fetching all other players in group excluding current player
+        players = self.get_others_in_group() # fetching all other players in group excluding current player
         for player in players:
             if player.field_maybe_none('subgroup') == self.field_maybe_none('subgroup'): #find the other player based on subgroup attribute
                 return player
@@ -103,56 +203,61 @@ class Player(BasePlayer):
 
 
 def creating_session(subsession: Subsession):
-    players = subsession.get_players()
-    num_players = len(players)
-    group_size = C.PLAYERS_PER_GROUP  # Default group size
-    num_bots_per_group = subsession.session.config.get('number_of_bots', 2)  # Default number of bots
-
-    # Calculate total number of bots in the subsession based on the number of players
-    total_num_bots = (num_players // group_size) * num_bots_per_group
-
-    # Counter for bots assigned
-    bots_assigned = 0
-
-    for i in range(num_players):
+    for player in subsession.get_players():
         # Assign unique_id to all players
-        players[i].set_unique_id()
-
-        # Check if the current index within each group segment should be a bot
-        if (i % group_size) < num_bots_per_group and bots_assigned < total_num_bots:
-            players[i].participant.vars['is_bot'] = True
-            bots_assigned += 1
-        else:
-            players[i].participant.vars['is_bot'] = False
-
-    # If you want to make sure that bots are evenly distributed and the last group might not be full
-    # but you still want it to contain the specified number of bots, you might need to adjust the logic above
-    # to keep track of how many players have been processed and ensure the bot assignment logic accounts for partial groups.
-
+        player.set_unique_id()
+        player.participant.vars['is_bot'] = False
+   
 
 # FUNCTIONS
 
-def set_payoffs_and_records_for_all_groups(subsession: Subsession): #decprecated need to be removed as only one group will be there
-    for group in subsession.get_groups():
-        set_payoffs_and_records(group)
+def bot_logic(player: Player, logic):
+    if logic == 'cdu':
+        if player.group.game == '1':
+            return True
+        else:
+            player_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
+            if player_records != []:
+                latest_record= player_records[-1]
+                if latest_record['your_decision'] == "A":
+                    your_decision = True # Cooperate if opponent has cooperated
+                else:
+                    your_decision =  False  # Defect if opponent has defected 
+    else:
+        your_decision =  random.choice([True, False]) 
+    
+    return your_decision
+
+def update_bot_records(player: Player, bot_pay, opponent_pay, bot_cooperate):
+    player.group.add_bot_record(player, bot_pay, opponent_pay, bot_cooperate)
 
 def set_payoffs_and_records(group: Group):
     for p in group.get_players():
-        set_payoff(p)
-
-    for p in group.get_players():
-        opponent = other_player(p)
-        update_game_record(p, p.game_pay, opponent.game_pay)
+        bot_pay, bot_cooperate = set_payoff(p)
+        if p.against_bot == False:
+            opponent = other_player(p)
+            update_game_record(p, p.game_pay, opponent.game_pay)
+        else:
+            update_game_record(p, p.game_pay, bot_pay)
+            update_bot_records(p,bot_pay,p.game_pay, bot_cooperate)
 
     for p in group.get_players():
         add_payoff(p)
 
 def update_game_record(player: Player, self_payoff, opponent_payoff):
-    opponent = other_player(player)
-    player.add_game_record(opponent, self_payoff, opponent_payoff)
+    if player.against_bot == False:
+        opponent = other_player(player)
+        player.add_game_record(opponent, self_payoff, opponent_payoff)
+    else:
+        opponent = dict(
+            unique_id = -1,
+            cooperate = bot_logic(player, C.BOT_LOGIC),
+            subgroup = -1
+        )
+        player.add_game_record(opponent, self_payoff, opponent_payoff)
 
 def other_player(player: Player):
-    return player.get_others_in_group()[0]
+    return player.get_other_in_subgroup()
 
 def set_payoff(player: Player):
     game_12 = player.group.game
@@ -162,8 +267,14 @@ def set_payoff(player: Player):
         payoff_matrix = C.PAYOFF_MATRIX_2
     else:
         raise ValueError(f"Invalid game type: {game_12}")
-    opponent = other_player(player)
-    player.game_pay = float(payoff_matrix[(player.cooperate, opponent.cooperate)])
+    if player.against_bot == False: 
+        opponent = other_player(player)
+        player.game_pay = float(payoff_matrix[(player.cooperate, opponent.cooperate)])
+        return None , None
+    else:
+        bot_cooperate = bot_logic(player, C.BOT_LOGIC)
+        player.game_pay = float(payoff_matrix[(player.cooperate, bot_cooperate)])
+        return float(payoff_matrix[(bot_cooperate, player.cooperate)]) , bot_cooperate
 
 def get_last_details(player: Player):
     player_last_round = player.in_round(player.round_number-1)
@@ -196,6 +307,15 @@ def get_player_details(player: Player):
             records = get_last_details(player)
     return records
         
+def get_bot_details(player: Player):
+    group = player.group
+    
+    # Call the method to get filtered bot records
+    selected_bot_records = group.get_filtered_bot_records()
+    
+    # Logic to return these records or handle them as needed
+    return selected_bot_records
+
 def get_filtered_records(player: Player, records, current_round):
     condition = player.session.config['past_records_display_condition_1_to_4']
     l_rounds = player.session.config['no_of_past_rounds_to_be_displayed']
@@ -241,25 +361,6 @@ def get_last_choice(records):
     else:
         return None
     
-def group_by_arrival_time_method(subsession, waiting_players):
-    # Number of bots to include in each group as specified in session config
-    num_bots = subsession.session.config.get('number_of_bots', 1)
-    # Ensure the number of bots does not exceed the limit for the group
-    num_bots = min(num_bots, C.PLAYERS_PER_GROUP - 1)
-
-    # Separate waiting players into bots and humans based on 'is_bot' attribute
-    bot_players = [p for p in waiting_players if p.participant.vars.get('is_bot', False)]
-    human_players = [p for p in waiting_players if not p.participant.vars.get('is_bot', False)]
-
-    # Check if there are enough humans and bots waiting to form a complete group
-    if len(human_players) >= C.PLAYERS_PER_GROUP - num_bots and len(bot_players) >= num_bots:
-        # Select the required number of bots and fill the rest of the group with humans
-        selected_bots = bot_players[:num_bots]
-        selected_humans = human_players[:(C.PLAYERS_PER_GROUP - num_bots)]
-        # Return the selected players to form a new group
-        return selected_bots + selected_humans
-
-
 # PAGES
 class Decision(Page):
     form_model = 'player'
@@ -275,15 +376,22 @@ class Decision(Page):
     def vars_for_template(player: Player):
         is_bot = player.participant.vars.get('is_bot', False) # Sent to HTML to display a different decision page for bot
         payoffs = get_payoff_matrix(player)
-        opponent = other_player(player)
-        self_records = get_player_details(player)
-        opponent_records = get_player_details(opponent)
-        opponent_last_choice = get_last_choice(opponent_records)
-        last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
+        if player.against_bot == False:
+            opponent = other_player(player)
+            opponent_records = get_player_details(opponent)
+            opponent_decision = opponent.field_maybe_none('cooperate')
+        else:
+            opponent_records = [] if player.group.game == '1' and player.round_number == 1 else get_bot_details(player)
+            opponent_decision = None
+        
         filtered_records = get_filtered_records(player, opponent_records, current_round)
+        opponent_last_choice = get_last_choice(opponent_records)   
+        self_records = get_player_details(player)
+        last_record = self_records[-1] if self_records != [] else None
         directinteraction = player.session.config['directinteraction']
         condition = player.session.config['past_records_display_condition_1_to_4']
+
         return dict(
             is_bot=is_bot,
             payoffs=payoffs,
@@ -292,9 +400,9 @@ class Decision(Page):
             last_record = last_record,
             game_12 = player.group.game,
             current_round = current_round,
-            same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
+            #same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
             my_decision = player.field_maybe_none('cooperate'),
-            opponent_decision = opponent.field_maybe_none('cooperate'),
+            opponent_decision = opponent_decision,
             condition = condition,
             opponent_last_choice = opponent_last_choice,
             directinteraction = directinteraction,
@@ -304,7 +412,7 @@ class Decision(Page):
     def before_next_page(player: Player, timeout_happened): #Bot logic
         if player.participant.vars.get('is_bot', False) and timeout_happened: # if bot implement bot logic
             if player.unique_id == 1:
-                opponent= player.get_others_in_group()[0]
+                opponent= player.get_other_in_subgroup()
                 opponent_records = json.loads(opponent.field_maybe_none('game_record')) if opponent.field_maybe_none('game_record') else []
                 if opponent_records != []:
                     latest_record= opponent_records[-1]
@@ -336,16 +444,25 @@ class Results(Page):
     def vars_for_template(player: Player,):
         opponent = other_player(player)
         self_records = get_player_details(player)
-        opponent_records = get_player_details(opponent)
-        opponent_last_choice = get_last_choice(opponent_records)
         last_record = self_records[-1] if self_records != [] else None
         current_round = player.round_number
+        if player.against_bot == False:
+            opponent = other_player(player)
+            opponent_records = get_player_details(opponent)
+            opponent_last_choice = get_last_choice(opponent_records)
+            filtered_records = get_filtered_records(player, opponent_records, current_round)
+            opponent_decision = opponent.field_maybe_none('cooperate')
+        else:
+            opponent_records = None
+            filtered_records = None
+            opponent_last_choice = None
+            opponent_decision = None
         final_payoff = player.participant.payoff
         final_amount = player.participant.payoff_plus_participation_fee()
         return dict(
-            same_choice=player.cooperate == opponent.cooperate,
+            #same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
-            opponent_decision=opponent.field_display('cooperate'),
+            opponent_decision=opponent_decision,
             self_records=None,
             current_round = current_round,
             last_record= last_record,
@@ -362,14 +479,22 @@ class RoundResults(Page):
     
     @staticmethod
     def vars_for_template(player: Player,):
-        opponent = other_player(player)
+        current_round = player.round_number
+        if player.against_bot == False:
+            opponent = other_player(player)
+            opponent_records = get_player_details(opponent)
+            opponent_decision = opponent.field_maybe_none('cooperate')
+        else:
+            opponent_records = None
+            filtered_records = None
+            opponent_last_choice = None
+            opponent_decision = None
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
         last_record = self_records[-1] if self_records != [] else None
-        current_round = player.round_number
         return dict(
-            same_choice = player.cooperate == opponent.cooperate,
+            #same_choice = player.cooperate == opponent.cooperate,
             my_decision = player.field_display('cooperate'),
-            opponent_decision = opponent.field_display('cooperate'),
+            opponent_decision = opponent_decision,
             self_records = None,
             current_round = current_round,
             last_record = last_record,
@@ -389,12 +514,14 @@ class GroupsShufflePage(WaitPage):
         if directinteraction == 1:
             pass
         else:
+            group.assign_against_bot()
             group.assign_subgroups()
             print("Players shuffled and Subgroups formed successfully!!")
             players = group.get_players()
             print(f"ROUND: {group.round_number} \n GAME: {group.game}")
             for player in players:
-                print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}")
+                print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, AGAINST BOT: {player.against_bot}")
+
 
 
 class GameGroupsPage(WaitPage):
@@ -404,13 +531,15 @@ class GameGroupsPage(WaitPage):
     def is_displayed(player: Player):
         return player.round_number == 1
     
+    @staticmethod
     def after_all_players_arrive(group: Group):
+        group.assign_against_bot()
         group.assign_subgroups()
         print("Players shuffled and Subgroups formed successfully!!")
         players = group.get_players()
         print(f"ROUND: {group.round_number} \n GAME: {group.game}")
         for player in players:
-            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, BOT: {player.participant.vars.get('is_bot', False)}")
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, AGAINST BOT: {player.against_bot}")
 
 
 class GroupsPage(WaitPage):
@@ -419,13 +548,15 @@ class GroupsPage(WaitPage):
     def is_displayed(player: Player):
         return player.round_number != 1
     
+    @staticmethod
     def after_all_players_arrive(group: Group):
+        group.assign_against_bot()
         group.assign_subgroups()
         print("Players shuffled and Subgroups formed successfully!!")
         players = group.get_players()
         print(f"ROUND: {group.round_number} \n GAME: {group.game}")
         for player in players:
-            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup},  BOT: {player.participant.vars.get('is_bot', False)}")
-        
+            print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, AGAINST BOT: {player.against_bot}")
+
 
 page_sequence = [GameGroupsPage, GroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
