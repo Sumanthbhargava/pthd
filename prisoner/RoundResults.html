@@ -1,4 +1,4 @@
-{{ block title }}Results of round {{ current_round }}  {% if last_record %} game {{ last_record.game }} {% endif %} {{ endblock }}
+{{ block title }}Results of round {{ current_round }}  {% if last_record %} {% if last_record.game == 2 %}game {{ last_record.game }} {% endif %} {% endif %}{{ endblock }}
 {{ block content }}
 {% if last_record %}
     <p>

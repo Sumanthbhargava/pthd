@@ -1,6 +1,6 @@
 {{ block title }}
 <h2 style="text-align: center;">Round {{ current_round }}</h2>
-<h3 style="text-align: center;">Game {{ game_12 }}</h3>
+<!--<h3 style="text-align: center;">Game {{ game_12 }}</h3>-->
 {{ endblock }}
 {{ block content }}
 <style>
@@ -39,17 +39,6 @@
         {% endif %}
         <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
     {% endif %}  
-{% else  %}
-    {% if last_record %}
-    <h3>Results of game {{ last_record.game }} </h3>
-        <p>
-            Now you will play game {{ game_12 }}.
-        </p> 
-        <p>
-            Keep in mind that your opponent may have changed.
-        </p>
-        <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
-    {% endif %}
 {% endif %} 
 <h3>Your Choice</h3>
 <div class="form-group required">
@@ -85,7 +74,7 @@
             <tr>
                 <th>Round</th>
                 <th>Game</th>
-                <th>Opponent's Strategy in game 1</th>
+                <th>Opponent's Strategy in previous game</th>
                 <th>Opponent's Payoff</th>
             </tr>
         </thead>
@@ -108,9 +97,9 @@
             <tr>
                 <th>Round</th>
                 <th>Game</th>
-                <th>Opponent's Strategy in game 1</th>
+                <th>Opponent's Strategy in previous game</th>
                 <th>Opponent's Payoff</th>
-                <th>Opponent's Opponent Strategy in Game 1</th>
+                <th>Opponent's Opponent Strategy in previous game</th>
                 <th>Opponent's Opponent Payoff</th>
             </tr>
         </thead>

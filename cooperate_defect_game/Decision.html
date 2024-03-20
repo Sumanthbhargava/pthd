@@ -39,17 +39,6 @@
         {% endif %}
         <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
     {% endif %}  
-{% else  %}
-    {% if last_record %}
-    <h3>Results of game {{ last_record.game }} </h3>
-        <p>
-            Now you will play game {{ game_12 }}.
-        </p> 
-        <p>
-            Keep in mind that your opponent may have changed.
-        </p>
-        <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
-    {% endif %}
 {% endif %} 
 <h3>Your Choice</h3>
 <div class="form-group required">

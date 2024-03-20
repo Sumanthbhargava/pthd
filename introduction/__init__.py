@@ -20,7 +20,7 @@ class MyBot(Bot):
     player = BasePlayer
 
 class Constants(BaseConstants):
-    name_in_url = 'Temperature'
+    name_in_url = 'Introduction'
     players_per_group = 6 # Need to change players based on how many players and bots, minimimum players = 3
     num_rounds = 25
     num_of_rounds = 3

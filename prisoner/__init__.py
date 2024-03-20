@@ -494,7 +494,6 @@ class GroupsShufflePage(WaitPage):
                 print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, AGAINST BOT: {player.against_bot}")
 
 
-
 class GameGroupsPage(WaitPage):
     group_by_arrival_time = True
 

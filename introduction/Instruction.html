@@ -8,7 +8,7 @@ Instructions
 {% block content %}
 <hr/>
 
-<div class="card m-3 cardq" id="1">
+<div class="card m-2 cardq" id="1">
     <div class="card-body">
         <h3 style="text-align: center;">
             Thank you for participating in our experiment!
@@ -17,15 +17,17 @@ Instructions
         <h4 style="text-align: center;">
             Instructions
         </h4>
-        <p>Please read these instructions carefully as it can help you to gain more reward from the game.</p>
+        <p>Please read these instructions carefully as it can help you to gain more money from the game.</p>
         <p>You will play a game in a group of {{no_of_participants}} participants. The game is composed of {{no_of_rounds}} rounds. Each round has two stages. 
             {% if directinteraction == 1 %} 
-                In each round, you will be paired with an opponent at random to play two games.
+                In each round, you will be paired with another participant at random to play two games.
             {% elif directinteraction == 0 %}
-                In each stage, you will be paired with an opponent at random to play a game.
+                In each stage, you will be paired with another participant at random to play a game.
             {% endif %} 
-            The game have two strategies, A and B.</p>
-        <p>We will call the game that you play in stage 1 of each round, game 1. Below you can see the payoff of yourself and your opponent in the game 1. You will need to choose your strategy by clicking on one of the blue buttons, A and B.</p>
+            In the game, you will have the opportunity to choose either an option A or an option B
+        The other participant will face a similar choice and the payoffs you receive will result from the combination of your choice and the other participant's choice.
+        Below you can see your payoffs and the other participant's payoffs in the first round (round 1). We will call the game that you play in stage 1 of each round, game 1.
+        <p>You will need to choose an option by clicking on one of the blue buttons, A or B. The first number in each cell shows your payoff and the second number shows your the other participant's payoff. For instance, if you both play A, you both get 3 points. If you both play B, you both get 1 points.If you play A and the other participant plays B, you will get 0 points and the other participant will get 5 points.</p>
         <table class='table table-bordered text-center' style='width: auto; margin: auto'>
             <tr>
                 <th colspan=2 rowspan=2></th>
@@ -50,15 +52,14 @@ Instructions
     </div>
 </div>
 
-<!-- Adding another card before the questions as requested -->
-<div class="card m-3" id="2">
+<div class="card m-2 cardq" id="2">
     <div class="card-body">
         <p>
-            After all players play <strong>game 1</strong>, you will go to the next stage, where you play <strong>game 2</strong>
+            After all players complete <strong>game 1</strong>, you will go to the next stage, where you play <strong>game 2</strong>
             {% if directinteraction == 1 %}
-                with the same opponent
+                with the same participant
             {% elif directinteraction == 0 %}
-                . Please note that your opponent in this game will be chosen anew from the group.
+                . Please note that the other player in this game will be chosen anew from the group.
             {% endif %}
         </p>
         <p>The payoff matrix of game 2 is shown below</p>
@@ -83,8 +84,8 @@ Instructions
                 <td>0 point, 0 point</td>
             </tr>
         </table>
-        <p>Here again, you can choose your strategy by clicking on the strategy of your choice shown in blue. Please note the payoffs in this game are different: if you both play A, you both get 3 points. If you both play B, you both get 0 points. And if you play A and your opponent plays B, you will get 1 point and your opponent will get 5 points.</p>
-        <p>Below you can see a screenshot of this stage. On the top of this page you see a summary of your and your opponent’s strategy in the previous stage, and your payoff from stage 1. Then you can see your opponent’s strategy in his/her previous game. Below this page, you can see a table containing information about your opponent’s strategy in his/her past {{l}} rounds in games
+        <p>Here again, you will choose your strategy by clicking on the option of your choice, which is shown in blue. Please note the payoffs in this game are different: if you both play A, you both get 3 points. If you both play B, you both get 0 points. If you play A and your the other participant plays B, you will get 1 point and the other participant will get 5 points. If you play B and the other participant plays A, you will get 5 points and the other participant will get 1 point.</p>
+        <p>Below you can see a screenshot of this stage. On the top of this page you see a summary of your and the other participant's strategy in the previous stage, and your payoff from stage 1. Then you can see your the other participant's decision from the previous game. At the bottom of the page, you can see a table containing information about the other participants' decisions that were made in the past {{l}} rounds in games
             {% if condition == 1 or condition == 2%}
             1.
             {% elif condition == 3 or condition == 4%}
@@ -93,6 +94,17 @@ Instructions
             .
             {% endif %}
             </p>
+        <p>
+            {% if condition == 1 %}
+            <img src="{% static '01.png' %}" alt="Screenshot of the stage" class="center-image" />
+            {% elif condition == 2 %}
+            <img src="{% static '02.png' %}" alt="Screenshot of the stage" class="center-image" />
+            {% elif condition == 3 %}
+            <img src="{% static '03.png' %}" alt="Screenshot of the stage" class="center-image" />
+            {% else%}
+            <img src="{% static '04.png' %}" alt="Screenshot of the stage" class="center-image" />
+            {% endif %}
+        </p>
     </div>
     
 </div>
@@ -256,8 +268,14 @@ $("#count").text(count)
   margin-right: auto;
   width: 50%;
 }
+.center-image {
+    display: block;
+    margin-left: auto;
+    margin-right: auto;
+    width: 75%; /* Adjust width as needed */
+}
 .cardq{
-height:530px
+height: auto
 }
 
     #msg{
