@@ -1,0 +1,63 @@
+{{ block title }}Results of round {{ current_round }}{{ endblock }}
+{{ block content }}
+    <style>
+        .game-records {
+            border-collapse: collapse;
+            width: 100%;
+        }
+        .game-records th, .game-records td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: left;
+        }
+        .game-records th {
+            background-color: #f2f2f2;
+        }
+        .game-records tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+    </style>
+    {% if last_record %}
+    <h3>Results of game {{ last_record.game }} </h3>
+        <p>
+            In the last round:
+        </p>
+        <p>
+            You chose to {{ last_record.your_decision }} and your opponent chose to {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+        </p>
+    {% endif %}  
+    <h3> Your final payoff is {{ final_payoff }}, as a result you have earned {{ final_amount }}. </h3>
+    {% if self_records %}
+        <h3>Your Past Results:</h3>
+        <table class="game-records" border="1">
+            <thead>
+                <tr>
+                    <th>Round</th>
+                    <th>Game</th>
+                    <th>Your ID</th>
+                    <th>Your's Decision</th>
+                    <th>Your Payoff</th>
+                    <th>Opponent's ID</th>
+                    <th>Opponent's Decision</th>
+                    <th>Opponent's Payoff</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for record in self_records %}
+                <tr>
+                    <td>{{ record.round }}</td>
+                    <td>{{ record.game }}</td>
+                    <td>{{ record.your_id }}</td>
+                    <td>{{ record.your_decision }}</td>
+                    <td>{{ record.your_payoff }}</td>
+                    <td>{{ record.opponent_id }}</td>
+                    <td>{{ record.opponent_decision }}</td>
+                    <td>{{ record.opponent_payoff }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endif %}
+    {{ next_button }}
+
+{{ endblock }}

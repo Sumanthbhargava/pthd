@@ -21,7 +21,7 @@ class MyBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Temperature'
-    players_per_group = 4
+    players_per_group = 6 # Need to change players based on how many players and bots, minimimum players = 3
     num_rounds = 25
     num_of_rounds = 3
     not_num_rounds = 50

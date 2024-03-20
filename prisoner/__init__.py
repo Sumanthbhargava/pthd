@@ -10,8 +10,8 @@ payoffs.
 
 
 class C(BaseConstants):
-    NAME_IN_URL = 'coop_defect_game'
-    PLAYERS_PER_GROUP = 6 # for 2 bots
+    NAME_IN_URL = 'prisoner'
+    PLAYERS_PER_GROUP = 6 # Minimum should be intended_players_per_group/2 as bots should not exceed humans
     BOT_LOGIC = 'cdu'
     intended_players_per_group = 6
     NUM_ROUNDS = 3
@@ -59,19 +59,12 @@ class Group(BaseGroup):
             self.temp_bot_records = json.dumps(self.get_last_bot_details()) if self.game =='1' else self.field_maybe_none('bot_records')
         all_bot_records = json.loads(self.field_maybe_none('temp_bot_records')) if self.field_maybe_none('temp_bot_records') else []
         # Temporary list to store selected bot records
-        print("<------------DEBUG------------>")
-        print("WHOLE BOT RECORDS:")
-        for i in json.loads(self.bot_records):
-            print(i)
-        print("-----------")
-        print("TEMP BOT RECORDS:")
-        for i in all_bot_records:
-            print(i)
-        print("-----------")
+        print(all_bot_records)
         selected_records = []
 
         if self.n > 0:
-            # Calculate the indices of the records to be selected and removed
+            # Calculate the indices of the records to be selecte
+            # d and removed
             indices_to_select = range(0, len(all_bot_records), self.n)
 
             # Select the records based on the calculated indices
@@ -84,11 +77,6 @@ class Group(BaseGroup):
         # Update temp_bot_records with what's left after removing selected records
         self.temp_bot_records = json.dumps(all_bot_records)
         self.n -= 1
-
-        print("SELECTED RECORDS TO DISPLAY")
-        for i in selected_records:
-            print(i)
-        print("-----------")
         return selected_records
 
 
@@ -331,9 +319,9 @@ def get_filtered_records(player: Player, records, current_round):
     if condition == 1 or condition == 2:
         filtered_records = [record for record in records if record['game'] == '1']
         return filtered_records[-l:]
-    elif condition == 3 or condition == 4:
+        """elif condition == 3 or condition == 4: #deprecated as there is no game b
         filtered_records = get_restructured_data(records)
-        return filtered_records[-l:]
+        return filtered_records[-l:]"""
     else:
         return records
 
@@ -376,7 +364,7 @@ class Decision(Page):
 
     @staticmethod
     def get_timeout_seconds(player: Player): # Adding timeout for bot to proceed to next page automatically
-        return None # Normal timeout for human players
+        return None
 
     @staticmethod
     def vars_for_template(player: Player):
@@ -404,10 +392,9 @@ class Decision(Page):
             last_record = last_record,
             game_12 = player.group.game,
             current_round = current_round,
-            #same_choice = player.field_maybe_none('cooperate') == opponent.field_maybe_none('cooperate'),
             my_decision = player.field_maybe_none('cooperate'),
             opponent_decision = opponent_decision,
-            condition = condition,
+            condition = condition if condition < 3 else 5,
             opponent_last_choice = opponent_last_choice,
             directinteraction = directinteraction,
             subgroup = player.field_maybe_none('subgroup'),
@@ -435,14 +422,13 @@ class Results(Page):
         if player.against_bot == False:
             opponent = other_player(player)
             opponent_records = get_player_details(opponent)
-            opponent_last_choice = get_last_choice(opponent_records)
-            filtered_records = get_filtered_records(player, opponent_records, current_round)
             opponent_decision = opponent.field_maybe_none('cooperate')
         else:
-            opponent_records = None
-            filtered_records = None
-            opponent_last_choice = None
+            opponent_records = [] if player.group.game == '1' and player.round_number == 1 else get_bot_details(player)
             opponent_decision = None
+        
+        filtered_records = get_filtered_records(player, opponent_records, current_round)
+        opponent_last_choice = get_last_choice(opponent_records) 
         final_payoff = player.participant.payoff
         final_amount = player.participant.payoff_plus_participation_fee()
         return dict(
@@ -469,15 +455,16 @@ class RoundResults(Page):
             opponent_records = get_player_details(opponent)
             opponent_decision = opponent.field_maybe_none('cooperate')
         else:
-            opponent_records = [] if player.group.game == '1' and player.round_number == 1 else get_bot_details(player)
+            opponent_records = None
+            filtered_records = None
+            opponent_last_choice = None
             opponent_decision = None
-        
-        filtered_records = get_filtered_records(player, opponent_records, current_round)
-        opponent_last_choice = get_last_choice(opponent_records) 
         self_records = json.loads(player.field_maybe_none('game_record')) if player.field_maybe_none('game_record') else []
         last_record = self_records[-1] if self_records != [] else None
         return dict(
+            #same_choice = player.cooperate == opponent.cooperate,
             my_decision = player.field_display('cooperate'),
+            opponent_decision = opponent_decision,
             self_records = None,
             current_round = current_round,
             last_record = last_record,
@@ -490,7 +477,8 @@ class GroupsShufflePage(WaitPage):
         #Get direct interaction from config
         directinteraction = group.subsession.session.config['directinteraction']
         if group.game == '1':
-            group.game = '2'
+            #group.game = '2' 
+            pass #removing game 2
         else:
             pass
 
@@ -542,4 +530,4 @@ class GroupsPage(WaitPage):
             print(f"Player ID: {player.unique_id}, Sub group: {player.subgroup}, AGAINST BOT: {player.against_bot}")
 
 
-page_sequence = [GameGroupsPage, GroupsPage, Decision, ResultsWaitPage, GroupsShufflePage, Decision, ResultsWaitPage, RoundResults, Results]
+page_sequence = [GameGroupsPage, GroupsPage, Decision, ResultsWaitPage, RoundResults, Results]

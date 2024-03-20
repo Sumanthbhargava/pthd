@@ -22,7 +22,7 @@ class MyBot(Bot):
 
 class Constants(BaseConstants):
     name_in_url = 'Gateway'
-    players_per_group = 4
+    players_per_group = 6 # Need to change players based on how many players and bots, minimimum players = 3
     num_rounds = 25
     not_num_rounds = 50
 
@@ -48,11 +48,6 @@ class Player(BasePlayer):
     captcha8 = models.BooleanField(widget=widgets.CheckboxInput, blank=True)
     captcha_score = models.IntegerField()
     prolific_id = models.StringField(default=str(" "))
-
-
-def creating_session(subsession: Subsession):
-    for i in range(0,len(subsession.get_players())):
-        bot_player = subsession.get_players()[i]  # Example: Assigns the first player as the bot
 
 
 def get_score(player):
