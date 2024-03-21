@@ -1,6 +1,7 @@
 from otree.api import *
 import json
 import random
+import time
 
 doc = """
 This is a one-shot "Prisoner's Dilemma". Two players are asked separately
@@ -201,7 +202,6 @@ class Player(BasePlayer):
 
 def creating_session(subsession: Subsession):
     for player in subsession.get_players():
-        # Assign unique_id to all players
         player.set_unique_id()
    
 
@@ -402,6 +402,7 @@ class Decision(Page):
                 
 
 class ResultsWaitPage(WaitPage):
+    time.sleep(2)
     after_all_players_arrive = set_payoffs_and_records
 
 class Results(Page):
@@ -435,7 +436,7 @@ class Results(Page):
             #same_choice=player.cooperate == opponent.cooperate,
             my_decision=player.field_display('cooperate'),
             opponent_decision=opponent_decision,
-            self_records=None,
+            self_records=self_records,
             current_round = current_round,
             last_record= last_record,
             final_payoff = final_payoff,

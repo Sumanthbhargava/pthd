@@ -24,20 +24,18 @@
     {% if last_record %}
     <h3>Results of game {{ last_record.game }} </h3>
         <p>
-            In the last round:
-        </p>
-        <p>
-            You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+            In the previous round:
+            You chose strategy {{ last_record.your_decision }} and the other participant chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
         </p>
         <p>
             Now you will play game {{ game_12 }}.
         </p> 
         {% if directinteraction == 0 %}
         <p>
-            Keep in mind that your opponent may have changed.
+            Keep in mind that your partner may have changed.
         </p>
         {% endif %}
-        <h4>Your opponent has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
+        <h4>Your current partner has chosen strategy {{ opponent_last_choice }} in the previous {% if game_12 == '2' %} game. {% else %} game of the previous round. {% endif %}</h4>
     {% endif %}  
 {% endif %} 
 <h3>Your Choice</h3>
@@ -65,7 +63,7 @@
     </table>
 </div>
 {% if last_record %}
-<h3>Below you can see your opponent’s decisions in the past rounds.</h3>
+<h3>Below you can see your opponent’s decisions in the previous rounds.</h3>
 {% endif %}
 {% if condition == 1 %}
     {% if filtered_records %}

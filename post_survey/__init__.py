@@ -264,4 +264,4 @@ class Survey2(Page):
         return player.round_number == C.NUM_ROUNDS
 
 
-page_sequence = [Neut, Survey, Survey2]
+page_sequence = [Neut, Survey2]

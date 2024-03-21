@@ -2,10 +2,8 @@
 {{ block content }}
 {% if last_record %}
     <p>
-        In the last round:
-    </p>
-    <p>
-        You chose strategy {{ last_record.your_decision }} and your opponent chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
+        In the previous round:
+        You chose strategy {{ last_record.your_decision }} and the other participant chose strategy {{ last_record.opponent_decision }}. As a result, you earned {{ last_record.your_payoff }}.
     </p>
     <p>
         Please press the next button to play the next round.

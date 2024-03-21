@@ -59,6 +59,7 @@ class Instruction(Page):
         directinteraction = player.subsession.session.config['directinteraction']
         l = player.subsession.session.config['no_of_past_rounds_to_be_displayed']
         condition = player.subsession.session.config['past_records_display_condition_1_to_4']
+        single_stage = player.subsession.session.config['single_stage']
         return dict(
             round=player.session.config["num_rounds"],
             not_num_rounds = Constants.not_num_rounds, 
@@ -68,6 +69,7 @@ class Instruction(Page):
             no_of_rounds = Constants.num_of_rounds,
             l = l,
             condition = condition,
+            single_stage = single_stage
             )
 
     @staticmethod

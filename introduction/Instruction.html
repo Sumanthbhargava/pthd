@@ -27,7 +27,7 @@ Instructions
             In the game, you will have the opportunity to choose either an option A or an option B
         The other participant will face a similar choice and the payoffs you receive will result from the combination of your choice and the other participant's choice.
         Below you can see your payoffs and the other participant's payoffs in the first round (round 1). We will call the game that you play in stage 1 of each round, game 1.
-        <p>You will need to choose an option by clicking on one of the blue buttons, A or B. The first number in each cell shows your payoff and the second number shows your the other participant's payoff. For instance, if you both play A, you both get 3 points. If you both play B, you both get 1 points.If you play A and the other participant plays B, you will get 0 points and the other participant will get 5 points.</p>
+        <p>You will need to choose an option by clicking on one of the blue buttons, A or B. The first number in each cell shows your payoff and the second number shows your the other participant's payoff. For instance, if you both play A, you both get 3 points. If you both play B, you both get 1 points. If you play A and the other participant plays B, you will get 0 points and the other participant will get 5 points.</p>
         <table class='table table-bordered text-center' style='width: auto; margin: auto'>
             <tr>
                 <th colspan=2 rowspan=2></th>
@@ -49,9 +49,12 @@ Instructions
                 <td>1 point, 1 point</td>
             </tr>
         </table>
+        {% if single_stage %}
+            <p>After all players complete the game, you will all go to the next round where your partner will randomly chosen anew from the group.</p> 
+        {% endif %}     
     </div>
 </div>
-
+{% if not single_stage %}
 <div class="card m-2 cardq" id="2">
     <div class="card-body">
         <p>
@@ -108,7 +111,7 @@ Instructions
     </div>
     
 </div>
-
+{% endif %}     
 <span id="introBtns">
     <input type="button" id="next" value="Next" class="btn btn-primary"></input>
 
@@ -116,7 +119,7 @@ Instructions
 
 <span id="compre">
 
-    1. You will be playing against how many opponents in a single game:
+    1. In a single game, how many participants will you be playing with?
 <br/>
 <input type="radio" id="1_a" name="1" value="1_a" required>
 <label for="1_a"> 1 </label><br>
@@ -126,7 +129,7 @@ Instructions
 2. What information of others choices you will see in each round?
 <br/>
 <input type="radio" id="2_a" name="2" value="2_a" required>
-<label for="2_a"> Predicitons of what your opponent might choose this round</label><br>
+<label for="2_a"> Predicitons of what the other participant might choose this round</label><br>
 <input type="radio" id="2_b" name="2" value="2_b">
 <label for="2_b"> Their decisions in the past rounds.</label><br>
 <br/>
@@ -139,7 +142,7 @@ Instructions
 
 <br/>
 
-4. How many opponents are there in total, including yourself?
+4. How many participants are there in total, including yourself?
 <br/>
 <input type="radio" id="4_a" name="4" value="4_a" required>
 <label for="4_a"> {{no_of_participants}}</label><br>

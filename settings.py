@@ -3,33 +3,20 @@ from os import environ
 
 SESSION_CONFIGS = [
     dict(
-        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['gateway','introduction','waitapp','cooperate_defect_game', 'post_survey','finish'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 3, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
+        name='cooperate_defect_game', display_name="Cooperate Defect Game", app_sequence=['gateway','introduction','waitapp','cooperate_defect_game', 'post_survey','finish'], num_demo_participants=6, past_records_display_condition_1_to_4 = 3, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1, single_stage= False, chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
 
     dict(
-        name='cooperate_defect_game_test', display_name="Cooperate Defect Game only test", app_sequence=['cooperate_defect_game'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
+        name='cooperate_defect_game_test', display_name="Cooperate Defect Game only test", app_sequence=['cooperate_defect_game'], num_demo_participants=6, past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
     dict(
-        name='cooperate_defect_game_control', display_name="PTHD Control", app_sequence=['gateway','introduction','waitapp','prisoner', 'post_survey','finish'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
+        name='cooperate_defect_game_control', display_name="PTHD Control", app_sequence=['gateway','introduction','waitapp','prisoner', 'post_survey','finish'], num_demo_participants=6, past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1, single_stage = True, chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
     dict(
-        name='cooperate_defect_game_control_test', display_name="PTHD Control test", app_sequence=['prisoner'], num_demo_participants=6, number_of_bots=1, past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
+        name='cooperate_defect_game_control_test', display_name="PTHD Control test", app_sequence=['prisoner'], num_demo_participants=6,  past_records_display_condition_1_to_4 = 1, no_of_past_rounds_to_be_displayed = 2, directinteraction = 1,  chatGPT=False, completionlink="https://app.prolific.com/submissions/complete?cc=CTPA66HT"
     ),
 ]
 
-"""dict(
-        name='guess_two_thirds',
-        display_name="Guess 2/3 of the Average",
-        app_sequence=['guess_two_thirds', 'payment_info'],
-        num_demo_participants=3,
-    ),
-    dict(
-        name='survey', app_sequence=['survey', 'payment_info'], num_demo_participants=1
-    ),
-    dict(
-        name='public_goods_simple', display_name="Simple Public Good", app_sequence=['public_goods_simple'], num_demo_participants=3, SESSION_FIELDS= ["multiplier", "last_multiplier"], PARTICIPANT_FIELDS=["endowment"]
-    ), #setting Session Fields to store current round multiplier and last round multiplier
-"""
 # if you set a property in SESSION_CONFIG_DEFAULTS, it will be inherited by all configs
 # in SESSION_CONFIGS, except those that explicitly override it.
 # the session config can be accessed from methods in your apps as self.session.config,
