@@ -173,6 +173,7 @@ Instructions
 <script>
 var proceed = 0;
 var page = 1; // Initialize page variable
+var single_stage =  {% if single_stage %}true{% else %}false{% endif %};
 proceed = 0
 $(document).ready(function() {
 $("#nextbtn").hide()
@@ -188,7 +189,12 @@ $(".otree-btn-next").text("Continue")
         $("#nextbtn").hide()
         $("#introBtns").show()
         $("#" + page).hide()
-        page = page - 1
+        if (single_stage && page == 3) {
+            page = 1;
+        } else {
+            // Otherwise, just go to the next page as usual
+            page = page - 1;
+        }
         $("#" + page).show()
         if (page > 1){
             $("#back").show()
@@ -200,7 +206,14 @@ $(".otree-btn-next").text("Continue")
 
     $("#next").click(function(){
         $("#" + page).hide()
-        page = page + 1
+        if (single_stage && page == 1) {
+            // If single_stage is true and we are on the first page,
+            // skip page 2 and go directly to comprehension questions
+            page = 3;
+        } else {
+            // Otherwise, just go to the next page as usual
+            page = page + 1;
+        }
         $("#" + page).show()
         $("#back").show()
         if (page == 3){
