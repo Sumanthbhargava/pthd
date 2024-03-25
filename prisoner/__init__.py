@@ -228,12 +228,20 @@ def update_bot_records(player: Player, bot_pay, opponent_pay, bot_cooperate):
     player.group.add_bot_record(player, bot_pay, opponent_pay, bot_cooperate)
 
 def set_payoffs_and_records(group: Group):
+    bot_pays = []
+    bot_cooperates = []
     for p in group.get_players():
         bot_pay, bot_cooperate = set_payoff(p)
+        bot_pays.append(bot_pay)
+        bot_cooperates.append(bot_cooperate)
+    
+    for p in group.get_players():
         if p.against_bot == False:
             opponent = other_player(p)
             update_game_record(p, p.game_pay, opponent.game_pay)
         else:
+            bot_pay = bot_pays.pop(0)
+            bot_cooperate.pop(0)
             update_game_record(p, p.game_pay, bot_pay)
             update_bot_records(p,bot_pay,p.game_pay, bot_cooperate)
 
